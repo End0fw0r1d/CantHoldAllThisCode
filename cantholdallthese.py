@@ -1,11 +1,11 @@
 from PIL import Image, ImageFilter, GifImagePlugin, ImageSequence
-import os, glob
+import os, glob, time
 import math, random
 import io
 import discord
 import requests
 import json
-import moviepy.editor as mp##moviepy is for converting to file formats Pillow doesnt support
+##import moviepy.editor as mp##dont think I need anymore
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord import Emoji
@@ -138,6 +138,7 @@ def upload_gif(emoteId):
     url = "https://api.gfycat.com/v1/gfycats/fetch/status/" + metadata["gfyname"]
     headers = {'User-Agent': "Slowing down gifs"}
     print("waiting for encode...", end=" ")
+    time.sleep(2)
     r = requests.get(url, headers=headers)
     ticket = r.json()
     print(ticket)
