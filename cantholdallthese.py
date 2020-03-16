@@ -4,6 +4,7 @@ import math, random
 import io
 import discord
 import requests
+import json
 import moviepy.editor as mp##moviepy is for converting to file formats Pillow doesnt support
 from discord.ext import commands
 from discord.ext.commands import Bot
@@ -36,6 +37,10 @@ shorts = False
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+
+mydict = {}
+with open('mydict.json') as json_file:
+    mydict = json.load(json_file)
 
 def exists(path):
     r = requests.head(path)
@@ -90,9 +95,11 @@ def download(urll,gifProcess):
 
 def get_token():
     payload = {
-    'grant_type':'client_credentials',
+    'grant_type':"password",
     'client_id':os.getenv('GFYCAT_CLIENT_ID'),
-    'client_secret':os.getenv('GFYCAT_CLIENT_SECRET')
+    'client_secret':os.getenv('GFYCAT_CLIENT_SECRET'),
+    'username':os.getenv('GFYCAT_USERNAME'),
+    'password':os.getenv('GFYCAT_PASSWORD')
     }
 
     url = "https://api.gfycat.com/v1/oauth/token"
@@ -104,9 +111,9 @@ def get_token():
     print(access_token)
     return access_token
 
-def upload_gif(sub_id):
+def upload_gif(emoteId):
     print("uploading")
-    title = "please work..."
+    title = "github.com/End0fw0r1d/CantHoldAllThisCode"
 
     # get gfyname
     url = "https://api.gfycat.com/v1/gfycats"
@@ -136,8 +143,12 @@ def upload_gif(sub_id):
     print(ticket)
     print(url)
     print(metadata["gfyname"])
+    mydict[emoteId] = "https://gfycat.com/"+metadata["gfyname"]
+    with open('mydict.json', 'w') as outfile:
+        json.dump(mydict, outfile)
 
     # Sometimes we have to wait
+    # kinda doesnt work?
     percentage = 0
     for i in range(457):
         if ticket["task"] == "encoding":
@@ -181,7 +192,7 @@ async def nine_nine(ctx, test):
             pog = download(url+".png",gifProcess)
             pog = Image.open("whutt.png")
             ##pog.save("whatif.png")
-        if gifProcess:
+        if gifProcess and stri3 not in mydict:
             images = []
             pog = Image.open("whutt.gif")
             ##pog.show()
@@ -209,10 +220,13 @@ async def nine_nine(ctx, test):
                 images[0].save('CantHoldAllThese.gif', save_all=True, append_images=images[1:], duration=gifDuration, loop=0, optimize=True)
                 optimize("CantHoldAllThese.gif")
                 print(os.path.getsize('CantHoldAllThese.gif'))
-                await ctx.channel.send("http://gfycat.com/"+upload_gif(1))
+                await ctx.channel.send("https://gfycat.com/"+upload_gif(stri3))
                 ##await ctx.channel.send(file=discord.File('CantHoldAllThese.gif'))
             else:
                 await ctx.channel.send("Emoji too long")
+        elif gifProcess and stri3 in mydict:
+            await ctx.channel.send("wow that worked")
+            await ctx.channel.send(mydict[stri3])
         else:
             for i in range(leng):
                 ##print(i)
