@@ -157,7 +157,7 @@ def upload_gif(sub_id):
 
 bot = commands.Bot(command_prefix='!')
 
-@bot.command(name='emoji')
+@bot.command(name='hold')
 async def nine_nine(ctx, test):
         start = test.find(":",3)+1
         stri2 = test[start:]
