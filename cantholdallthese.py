@@ -144,7 +144,7 @@ def upload_gif(emoteId):
     print(ticket)
     print(url)
     print(metadata["gfyname"])
-    mydict[emoteId] = "https://gfycat.com/"+metadata["gfyname"]
+    mydict[emoteId] = metadata["gfyname"]
     with open('mydict.json', 'w') as outfile:
         json.dump(mydict, outfile)
 
@@ -153,7 +153,7 @@ def upload_gif(emoteId):
     percentage = 0
     for i in range(457):
         if ticket["task"] == "encoding":
-            time.sleep(7)
+            time.sleep(4)
             r = requests.get(url, headers=headers)
             ticket = r.json()
             print(ticket)
@@ -199,7 +199,7 @@ async def nine_nine(ctx, test):
             ##pog.show()
             totalFrames = pog.n_frames
             gifDuration = pog.info['duration']
-            if totalFrames < 333:
+            if totalFrames < 200:
                 for frame in range(0, totalFrames, 1):
                     onec = one.copy()
                     twoc = two.copy()
@@ -221,13 +221,13 @@ async def nine_nine(ctx, test):
                 images[0].save('CantHoldAllThese.gif', save_all=True, append_images=images[1:], duration=gifDuration, loop=0, optimize=True)
                 optimize("CantHoldAllThese.gif")
                 print(os.path.getsize('CantHoldAllThese.gif'))
-                await ctx.channel.send("https://gfycat.com/"+upload_gif(stri3))
+                await ctx.channel.send("https://thumbs.gfycat.com/"+upload_gif(stri3)+"-mobile.mp4")
                 ##await ctx.channel.send(file=discord.File('CantHoldAllThese.gif'))
             else:
                 await ctx.channel.send("Emoji too long")
         elif gifProcess and stri3 in mydict:
             await ctx.channel.send("wow that worked")
-            await ctx.channel.send(mydict[stri3])
+            await ctx.channel.send("https://thumbs.gfycat.com/"+mydict[stri3]+"-mobile.mp4")
         else:
             for i in range(leng):
                 ##print(i)
