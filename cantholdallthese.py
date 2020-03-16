@@ -4,12 +4,15 @@ import math, random
 import io
 import discord
 import requests
+import moviepy.editor as mp##moviepy is for converting to file formats Pillow doesnt support
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord import Emoji
 from discord import File
 from dotenv import load_dotenv
 from pygifsicle import optimize
+from requests_toolbelt import MultipartEncoder
+##from imgurpython import ImgurClient
 
 X = [226,160,280,198,255,280,160]
 Y = [515,530,540,550,550,585,645]
@@ -45,6 +48,112 @@ def download(urll,gifProcess):
         else:
             open('whutt.png', 'wb').write(r.content)
         r.close()
+##Imgur upload stuff below
+##def authenticateImgur():
+##	client_id = os.getenv('IMGUR_API_ID')
+##	client_secret = os.getenv('IMGUR_API_SECRET')
+##	client = ImgurClient(client_id, client_secret)
+
+##	# Authorization flow, pin example (see docs for other auth types)
+####	authorization_url = client.get_auth_url('pin')
+##
+####	print("Go to the following URL: {0}".format(authorization_url))
+##
+##	# Read in the pin, handle Python 2 or 3 here.
+####	pin = input("Enter pin code: ")
+##
+##	# ... redirect user to `authorization_url`, obtain pin (or code or token) ...
+####	credentials = client.authorize(pin, 'pin')
+####	client.set_user_auth(credentials['access_token'], credentials['refresh_token'])
+##	access_token = os.getenv('ACCESS_TOKEN')
+##	refresh_token = os.getenv('REFRESH_TOKEN')
+##	client.set_user_auth(access_token, refresh_token)
+##
+####	print("Authentication successful! Here are the details:")
+####	print("   Access token:  {0}".format(credentials['access_token']))
+####	print("   Refresh token: {0}".format(credentials['refresh_token']))
+##
+##	return client
+
+##def upload_png(gif):
+##    client_id = os.getenv('IMGUR_API_ID')
+##    client_secret = os.getenv('IMGUR_API_SECRET')
+##    if client_id is None or client_secret is None:
+##        print('Cannot upload - could not find IMGUR_API_ID or IMGUR_API_SECRET environment variables')
+##        return
+##    ##client = ImgurClient(client_id, client_secret)
+##    client = authenticateImgur()
+##    print("wee")
+##    response = client.upload_from_path(gif, anon=False)
+##    text = ('File uploaded: {}'.format(response['link']))
+##    return text
+
+def get_token():
+    payload = {
+    'grant_type':'client_credentials',
+    'client_id':os.getenv('GFYCAT_CLIENT_ID'),
+    'client_secret':os.getenv('GFYCAT_CLIENT_SECRET')
+    }
+
+    url = "https://api.gfycat.com/v1/oauth/token"
+    r = requests.post(url, data=str(payload), headers={'User-Agent': "Slow down bot"})
+
+    response = r.json()
+
+    access_token = response["access_token"]
+    print(access_token)
+    return access_token
+
+def upload_gif(sub_id):
+    print("uploading")
+    title = "please work..."
+
+    # get gfyname
+    url = "https://api.gfycat.com/v1/gfycats"
+    headers = {"Authorization": "Bearer " + get_token(), 'User-Agent': "Slow down bot",
+                'Content-Type': 'application/json'}
+
+    params = {}
+
+    if title:
+        params["title"] = title
+
+    r = requests.post(url, headers=headers, data=str(params))
+    print(r.text)
+
+    metadata = r.json()
+
+    url = "https://filedrop.gfycat.com"
+    with open("S:/Image Stuff/testy/CantHoldAllThese.gif", 'rb') as f:
+        files = {"key": metadata["gfyname"], "file": (metadata["gfyname"], f, "video/mp4")}
+        m = MultipartEncoder(fields=files)
+        r = requests.post(url, data=m, headers={'Content-Type': m.content_type, 'User-Agent': "Slowing down gifs"})
+    url = "https://api.gfycat.com/v1/gfycats/fetch/status/" + metadata["gfyname"]
+    headers = {'User-Agent': "Slowing down gifs"}
+    print("waiting for encode...", end=" ")
+    r = requests.get(url, headers=headers)
+    ticket = r.json()
+    print(ticket)
+    print(url)
+    print(metadata["gfyname"])
+
+    # Sometimes we have to wait
+    percentage = 0
+    for i in range(457):
+        if ticket["task"] == "encoding":
+            time.sleep(7)
+            r = requests.get(url, headers=headers)
+            ticket = r.json()
+            print(ticket)
+            if float(ticket.get('progress', 0)) > percentage:
+                percentage = float(ticket['progress'])
+                print(percentage, end=" ")
+            else:
+                break
+
+
+    # os.system('rm temp/slow-{}.mp4'.format(sub_id))
+    return metadata["gfyname"]
 
 bot = commands.Bot(command_prefix='!')
 
@@ -78,7 +187,7 @@ async def nine_nine(ctx, test):
             ##pog.show()
             totalFrames = pog.n_frames
             gifDuration = pog.info['duration']
-            if totalFrames < 91:
+            if totalFrames < 333:
                 for frame in range(0, totalFrames, 1):
                     onec = one.copy()
                     twoc = two.copy()
@@ -100,7 +209,8 @@ async def nine_nine(ctx, test):
                 images[0].save('CantHoldAllThese.gif', save_all=True, append_images=images[1:], duration=gifDuration, loop=0, optimize=True)
                 optimize("CantHoldAllThese.gif")
                 print(os.path.getsize('CantHoldAllThese.gif'))
-                await ctx.channel.send(file=discord.File('CantHoldAllThese.gif'))
+                await ctx.channel.send("http://gfycat.com/"+upload_gif(1))
+                ##await ctx.channel.send(file=discord.File('CantHoldAllThese.gif'))
             else:
                 await ctx.channel.send("Emoji too long")
         else:
@@ -113,6 +223,7 @@ async def nine_nine(ctx, test):
             ##comp2.show()
             comp2.save('CantHoldAllThese.png')
             await ctx.channel.send(file=discord.File('CantHoldAllThese.png'))
+            ##await ctx.channel.send(upload_png('CantHoldAllThese.png'))
 
 
 bot.run(TOKEN)
