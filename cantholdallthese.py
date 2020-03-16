@@ -124,7 +124,7 @@ def upload_gif(sub_id):
     metadata = r.json()
 
     url = "https://filedrop.gfycat.com"
-    with open("S:/Image Stuff/testy/CantHoldAllThese.gif", 'rb') as f:
+    with open("CantHoldAllThese.gif", 'rb') as f:
         files = {"key": metadata["gfyname"], "file": (metadata["gfyname"], f, "video/mp4")}
         m = MultipartEncoder(fields=files)
         r = requests.post(url, data=m, headers={'Content-Type': m.content_type, 'User-Agent': "Slowing down gifs"})
