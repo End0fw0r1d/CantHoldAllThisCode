@@ -169,7 +169,7 @@ def upload_gif(emoteId):
 
 bot = commands.Bot(command_prefix='!')
 
-@bot.command(name='hold')
+@bot.command(name='hold2')
 async def nine_nine(ctx, test):
         start = test.find(":",3)+1
         stri2 = test[start:]
@@ -196,7 +196,6 @@ async def nine_nine(ctx, test):
         if gifProcess and stri3 not in mydict:
             images = []
             pog = Image.open("whutt.gif")
-            ##pog.show()
             totalFrames = pog.n_frames
             gifDuration = pog.info['duration']
             if totalFrames < 200:
@@ -204,19 +203,13 @@ async def nine_nine(ctx, test):
                     onec = one.copy()
                     twoc = two.copy()
                     pogc = pog
-                    pogc.seek(frame)    
+                    pogc.seek(frame)
                     pogc2 = pogc.copy().convert('RGBA')
-                    ##pogc.show()
-                    ##pogc2.show()
                     for i in range(leng):
-                        ##print(i)
                         onec.alpha_composite(pogc2.resize((70,70), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
                     comp2 = Image.alpha_composite(onec,twoc)
                     for i in range(leng2):
-                        ##print(i)
                         comp2.alpha_composite(pogc2.resize((70,70), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
-                    ##comp2.show()
-                    print(frame)
                     images.append(comp2)
                 images[0].save('CantHoldAllThese.gif', save_all=True, append_images=images[1:], duration=gifDuration, loop=0, optimize=True)
                 optimize("CantHoldAllThese.gif")
@@ -240,5 +233,86 @@ async def nine_nine(ctx, test):
             await ctx.channel.send(file=discord.File('CantHoldAllThese.png'))
             ##await ctx.channel.send(upload_png('CantHoldAllThese.png'))
 
+@bot.command(name='shake2')
+async def nine_eight(ctx, test):
+        start = test.find(":",3)+1
+        stri2 = test[start:]
+        stri3 = stri2[:-1]
+        if stri3 == '681244980593164336':
+            shorts = True
+        else:
+            shorts = False
+        if shorts:
+            one1 = short.copy()
+        else:
+            one1 = one.copy()
+        two2 = two.copy()
+        ##await ctx.send("https://cdn.discordapp.com/emojis/"+stri3+".png")
+        url = "https://cdn.discordapp.com/emojis/"+stri3
+        if exists(url+".gif"):
+            gifProcess = True
+            pog = download(url+".gif",gifProcess)
+            stri3 = stri3+"rand"
+        else:
+            gifProcess = False
+            pog = download(url+".png",gifProcess)
+            pog = Image.open("whutt.png")
+            ##pog.save("whatif.png")
+        if gifProcess and stri3 not in mydict:
+            images = []
+            Offset1 = []
+            Offset2 = []
+            pog = Image.open("whutt.gif")
+            ##pog.show()
+            totalFrames = pog.n_frames
+            gifDuration = pog.info['duration']
+            for i in range(0, 7, 1):
+                Offset1.append(random.randint(0,totalFrames))
+            for i in range(0, 2, 1):
+                Offset2.append(random.randint(0,totalFrames))
+            if totalFrames < 200:
+                for frame in range(0, totalFrames, 1):
+                    onec = one.copy()
+                    twoc = two.copy()
+                    pogc = pog
+                    ##pogc.seek(frame)
+                    ##pogc2 = pogc.copy().convert('RGBA')
+                    for i in range(leng):
+                        newframe = frame + Offset1[i]
+                        if newframe >= totalFrames:
+                            newframe = newframe - totalFrames
+                        pogc.seek(newframe)
+                        pogc2 = pogc.copy().convert('RGBA')
+                        onec.alpha_composite(pogc2.resize((70,70), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
+                    comp2 = Image.alpha_composite(onec,twoc)
+                    for i in range(leng2):
+                        newframe = frame + Offset2[i]
+                        if newframe >= totalFrames:
+                            newframe = newframe - totalFrames
+                        pogc.seek(newframe)
+                        pogc2 = pogc.copy().convert('RGBA')
+                        comp2.alpha_composite(pogc2.resize((70,70), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
+                    images.append(comp2)
+                images[0].save('CantHoldAllThese.gif', save_all=True, append_images=images[1:], duration=gifDuration, loop=0, optimize=True)
+                optimize("CantHoldAllThese.gif")
+                print(os.path.getsize('CantHoldAllThese.gif'))
+                await ctx.channel.send("https://thumbs.gfycat.com/"+upload_gif(stri3)+"-mobile.mp4")
+                ##await ctx.channel.send(file=discord.File('CantHoldAllThese.gif'))
+            else:
+                await ctx.channel.send("Emoji too long")
+        elif gifProcess and stri3 in mydict:
+            await ctx.channel.send("wow that worked")
+            await ctx.channel.send("https://thumbs.gfycat.com/"+mydict[stri3]+"-mobile.mp4")
+        else:
+            for i in range(leng):
+                ##print(i)
+                one1.alpha_composite(pog.resize((70,70), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
+            comp2 = Image.alpha_composite(one1,two2)
+            for i in range(leng2):
+                comp2.alpha_composite(pog.resize((70,70), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
+            ##comp2.show()
+            comp2.save('CantHoldAllThese.png')
+            await ctx.channel.send(file=discord.File('CantHoldAllThese.png'))
+            ##await ctx.channel.send(upload_png('CantHoldAllThese.png'))
 
 bot.run(TOKEN)
