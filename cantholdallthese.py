@@ -48,7 +48,7 @@ def exists(path):
     r = requests.head(path)
     return r.status_code == requests.codes.ok
 
-def grabImage(urll): ##if you direct link to a png/gif/etc, it will directly return it as a pillow image object
+def grabImage(urll): ##if you direct link to a png/gif/etc, it will directly return it as a bytestream of the image
     r = requests.get(urll, allow_redirects=True)
     return io.BytesIO(r.content)
     r.close()
