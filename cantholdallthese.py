@@ -161,11 +161,15 @@ def upload_gfy(emoteId,which):
 async def processStaticImage(context,emoPng,emojiId):
     one1 = Image.open("Base.png").copy() if emojiId != '681244980593164336' else Image.open("BaseAwooga.png").copy()
     two1 = Image.open("Arm.png").copy()
+    wRatio = emoPng.width/emoPng.height
+    ## w*h = a, a = 4900, w = wR*h, (wR*h)*h = a, wR*h^2 = a
+    height = round(math.sqrt(4900/wRatio))
+    width = round(wRatio*height)
     for i in range(leng):
-        one1.alpha_composite(emoPng.resize((70,70), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
+        one1.alpha_composite(emoPng.resize((width,height), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
     comp2 = Image.alpha_composite(one1,two1)
     for i in range(leng2):
-        comp2.alpha_composite(emoPng.resize((70,70), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
+        comp2.alpha_composite(emoPng.resize((width,height), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
     comp2.save(emojiId+'.png', format='PNG')
     await context.channel.send(file=discord.File(emojiId+'.png',filename="CantHoldAllThese.png"))
     os.remove(emojiId+'.png')
@@ -179,6 +183,10 @@ async def processGifImage(context,emoGif,emojiId,rando):
     Offset2 = []
     totalFrames = emoGif.n_frames
     gifDuration = emoGif.info['duration']
+    wRatio = emoGif.width/emoGif.height
+    ## w*h = a, a = 4900, w = wR*h, (wR*h)*h = a, wR*h^2 = a
+    height = round(math.sqrt(4900/wRatio))
+    width = round(wRatio*height)
     for i in range(0, 7, 1):
         Offset1.append(random.randint(0,totalFrames*rando))
     for i in range(0, 2, 1):
@@ -193,7 +201,7 @@ async def processGifImage(context,emoGif,emojiId,rando):
                     newframe = newframe - totalFrames
                 emoGif.seek(newframe)
                 emoFrame = emoGif.copy().convert('RGBA')
-                onec.alpha_composite(emoFrame.resize((70,70), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
+                onec.alpha_composite(emoFrame.resize((width,height), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
             comp2 = Image.alpha_composite(onec,twoc)
             for i in range(leng2):
                 newframe = frame + Offset2[i]
@@ -201,7 +209,7 @@ async def processGifImage(context,emoGif,emojiId,rando):
                     newframe = newframe - totalFrames
                 emoGif.seek(newframe)
                 emoFrame = emoGif.copy().convert('RGBA')
-                comp2.alpha_composite(emoFrame.resize((70,70), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
+                comp2.alpha_composite(emoFrame.resize((width,height), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
             images.append(comp2)
         images[0].save(emojiId+'.gif', save_all=True, append_images=images[1:], duration=gifDuration, loop=0, optimize=True)
         optimize(emojiId+'.gif')
@@ -222,7 +230,7 @@ async def processGifImage(context,emoGif,emojiId,rando):
 
 bot = commands.Bot(command_prefix='!')
 
-@bot.command(name='hold2')
+@bot.command(name='hold')
 async def holding(ctx, emojiStr):
     ##print(emojiStr)
     lookStart = emojiStr.find(":",3)+1
@@ -240,7 +248,7 @@ async def holding(ctx, emojiStr):
         await processStaticImage(ctx,emojiImage,idString)
         
 
-@bot.command(name='shake2')
+@bot.command(name='shake')
 
 async def shaking(ctx, emojiStr):
     lookStart = emojiStr.find(":",3)+1
