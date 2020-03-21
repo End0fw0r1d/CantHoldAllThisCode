@@ -159,8 +159,8 @@ def upload_gfy(emoteId,which):
 
 
 async def processStaticImage(context,emoPng,emojiId):
-    one1 = Image.open("Base.png").copy() if emojiId == '681244980593164336' else Image.open("BaseAwooga.png").copy()
-    two2 = Image.open("Arm.png").copy()
+    one1 = Image.open("Base.png").copy() if emojiId != '681244980593164336' else Image.open("BaseAwooga.png").copy()
+    two1 = Image.open("Arm.png").copy()
     for i in range(leng):
         one1.alpha_composite(emoPng.resize((70,70), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
     comp2 = Image.alpha_composite(one1,two1)
