@@ -5,6 +5,7 @@ import io
 import discord
 import requests
 import json
+import ftplib
 ##import moviepy.editor as mp##dont think I need anymore
 from discord.ext import commands
 from discord.ext.commands import Bot
@@ -13,6 +14,7 @@ from discord import File
 from dotenv import load_dotenv
 from pygifsicle import optimize
 from requests_toolbelt import MultipartEncoder
+from io import BytesIO
 ##from imgurpython import ImgurClient
 
 X = [226,160,280,198,255,280,160]
@@ -46,13 +48,10 @@ def exists(path):
     r = requests.head(path)
     return r.status_code == requests.codes.ok
 
-def download(urll,gifProcess):
-        r = requests.get(urll, allow_redirects=True)
-        if gifProcess:
-            open('whutt.gif', 'wb').write(r.content)
-        else:
-            open('whutt.png', 'wb').write(r.content)
-        r.close()
+def grabImage(urll): ##if you direct link to a png/gif/etc, it will directly return it as a bytestream of the image
+    r = requests.get(urll, allow_redirects=True)
+    return io.BytesIO(r.content)
+    r.close()
 ##Imgur upload stuff below
 ##def authenticateImgur():
 ##	client_id = os.getenv('IMGUR_API_ID')
@@ -111,27 +110,21 @@ def get_token():
     print(access_token)
     return access_token
 
-def upload_gif(emoteId):
+def upload_gfy(emoteId,which):
     print("uploading")
     title = "github.com/End0fw0r1d/CantHoldAllThisCode"
-
     # get gfyname
     url = "https://api.gfycat.com/v1/gfycats"
     headers = {"Authorization": "Bearer " + get_token(), 'User-Agent': "Slow down bot",
                 'Content-Type': 'application/json'}
-
     params = {}
-
     if title:
         params["title"] = title
-
     r = requests.post(url, headers=headers, data=str(params))
     print(r.text)
-
     metadata = r.json()
-
     url = "https://filedrop.gfycat.com"
-    with open("CantHoldAllThese.gif", 'rb') as f:
+    with open(emoteId+".gif", 'rb') as f:
         files = {"key": metadata["gfyname"], "file": (metadata["gfyname"], f, "video/mp4")}
         m = MultipartEncoder(fields=files)
         r = requests.post(url, data=m, headers={'Content-Type': m.content_type, 'User-Agent': "Slowing down gifs"})
@@ -139,17 +132,16 @@ def upload_gif(emoteId):
     headers = {'User-Agent': "Slowing down gifs"}
     print("waiting for encode...", end=" ")
     time.sleep(2)
+    os.remove(emoteId+'.gif')
     r = requests.get(url, headers=headers)
     ticket = r.json()
     print(ticket)
     print(url)
     print(metadata["gfyname"])
-    mydict[emoteId] = metadata["gfyname"]
+    mydict[emoteId+which] = metadata["gfyname"]
     with open('mydict.json', 'w') as outfile:
         json.dump(mydict, outfile)
-
     # Sometimes we have to wait
-    # kinda doesnt work?
     percentage = 0
     for i in range(457):
         if ticket["task"] == "encoding":
@@ -162,157 +154,115 @@ def upload_gif(emoteId):
                 print(percentage, end=" ")
             else:
                 break
-
-
     # os.system('rm temp/slow-{}.mp4'.format(sub_id))
     return metadata["gfyname"]
 
+
+async def processStaticImage(context,emoPng,emojiId):
+    one1 = Image.open("Base.png").copy() if emojiId != '681244980593164336' else Image.open("BaseAwooga.png").copy()
+    two1 = Image.open("Arm.png").copy()
+    wRatio = emoPng.width/emoPng.height
+    ## w*h = a, a = 4900, w = wR*h, (wR*h)*h = a, wR*h^2 = a
+    height = round(math.sqrt(4900/wRatio))
+    width = round(wRatio*height)
+    for i in range(leng):
+        one1.alpha_composite(emoPng.resize((width,height), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
+    comp2 = Image.alpha_composite(one1,two1)
+    for i in range(leng2):
+        comp2.alpha_composite(emoPng.resize((width,height), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
+    comp2.save(emojiId+'.png', format='PNG')
+    await context.channel.send(file=discord.File(emojiId+'.png',filename="CantHoldAllThese.png"))
+    os.remove(emojiId+'.png')
+
+
+async def processGifImage(context,emoGif,emojiId,rando):
+    one1 = Image.open("Base.png").copy()
+    two2 = Image.open("Arm.png").copy()
+    images = []
+    Offset1 = []
+    Offset2 = []
+    totalFrames = emoGif.n_frames
+    gifDuration = emoGif.info['duration']
+    wRatio = emoGif.width/emoGif.height
+    ## w*h = a, a = 4900, w = wR*h, (wR*h)*h = a, wR*h^2 = a
+    height = round(math.sqrt(4900/wRatio))
+    width = round(wRatio*height)
+    for i in range(0, 7, 1):
+        Offset1.append(random.randint(0,totalFrames*rando))
+    for i in range(0, 2, 1):
+        Offset2.append(random.randint(0,totalFrames*rando))
+    if totalFrames < 200:
+        for frame in range(0, totalFrames, 1):
+            onec = one1.copy()
+            twoc = two2.copy()
+            for i in range(leng):
+                newframe = frame + Offset1[i]
+                if newframe >= totalFrames:
+                    newframe = newframe - totalFrames
+                emoGif.seek(newframe)
+                emoFrame = emoGif.copy().convert('RGBA')
+                onec.alpha_composite(emoFrame.resize((width,height), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
+            comp2 = Image.alpha_composite(onec,twoc)
+            for i in range(leng2):
+                newframe = frame + Offset2[i]
+                if newframe >= totalFrames:
+                    newframe = newframe - totalFrames
+                emoGif.seek(newframe)
+                emoFrame = emoGif.copy().convert('RGBA')
+                comp2.alpha_composite(emoFrame.resize((width,height), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
+            images.append(comp2)
+        images[0].save(emojiId+'.gif', save_all=True, append_images=images[1:], duration=gifDuration, loop=0, optimize=True)
+        optimize(emojiId+'.gif')
+        which = 'rand' if rando else ''
+        await context.channel.send("https://thumbs.gfycat.com/"+upload_gfy(emojiId,which)+"-mobile.mp4")
+        ##await ctx.channel.send(file=discord.File('CantHoldAllThese.gif'))
+    else:
+        await context.channel.send("Emoji too long")
+
+
+##client = discord.Client()
+##@client.event
+##async def on_message(message):
+##    if message.author == client.user:
+##        return
+##    print(message.content)
+##client.run(TOKEN)
+
 bot = commands.Bot(command_prefix='!')
 
-@bot.command(name='hold2')
-async def nine_nine(ctx, test):
-        start = test.find(":",3)+1
-        stri2 = test[start:]
-        stri3 = stri2[:-1]
-        if stri3 == '681244980593164336':
-            shorts = True
-        else:
-            shorts = False
-        if shorts:
-            one1 = short.copy()
-        else:
-            one1 = one.copy()
-        two2 = two.copy()
-        ##await ctx.send("https://cdn.discordapp.com/emojis/"+stri3+".png")
-        url = "https://cdn.discordapp.com/emojis/"+stri3
-        if exists(url+".gif"):
-            gifProcess = True
-            pog = download(url+".gif",gifProcess)  
-        else:
-            gifProcess = False
-            pog = download(url+".png",gifProcess)
-            pog = Image.open("whutt.png")
-            ##pog.save("whatif.png")
-        if gifProcess and stri3 not in mydict:
-            images = []
-            pog = Image.open("whutt.gif")
-            totalFrames = pog.n_frames
-            gifDuration = pog.info['duration']
-            if totalFrames < 200:
-                for frame in range(0, totalFrames, 1):
-                    onec = one.copy()
-                    twoc = two.copy()
-                    pogc = pog
-                    pogc.seek(frame)
-                    pogc2 = pogc.copy().convert('RGBA')
-                    for i in range(leng):
-                        onec.alpha_composite(pogc2.resize((70,70), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
-                    comp2 = Image.alpha_composite(onec,twoc)
-                    for i in range(leng2):
-                        comp2.alpha_composite(pogc2.resize((70,70), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
-                    images.append(comp2)
-                images[0].save('CantHoldAllThese.gif', save_all=True, append_images=images[1:], duration=gifDuration, loop=0, optimize=True)
-                optimize("CantHoldAllThese.gif")
-                print(os.path.getsize('CantHoldAllThese.gif'))
-                await ctx.channel.send("https://thumbs.gfycat.com/"+upload_gif(stri3)+"-mobile.mp4")
-                ##await ctx.channel.send(file=discord.File('CantHoldAllThese.gif'))
-            else:
-                await ctx.channel.send("Emoji too long")
-        elif gifProcess and stri3 in mydict:
-            await ctx.channel.send("wow that worked")
-            await ctx.channel.send("https://thumbs.gfycat.com/"+mydict[stri3]+"-mobile.mp4")
-        else:
-            for i in range(leng):
-                ##print(i)
-                one1.alpha_composite(pog.resize((70,70), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
-            comp2 = Image.alpha_composite(one1,two2)
-            for i in range(leng2):
-                comp2.alpha_composite(pog.resize((70,70), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
-            ##comp2.show()
-            comp2.save('CantHoldAllThese.png')
-            await ctx.channel.send(file=discord.File('CantHoldAllThese.png'))
-            ##await ctx.channel.send(upload_png('CantHoldAllThese.png'))
+@bot.command(name='hold')
+async def holding(ctx, emojiStr):
+    ##print(emojiStr)
+    lookStart = emojiStr.find(":",3)+1
+    idString = emojiStr[lookStart:][:-1]
+    shorts = True if idString == '681244980593164336' else False
+    url = "https://cdn.discordapp.com/emojis/"+idString
+    gifProcess = exists(url+".gif")
+    if gifProcess and idString in mydict:
+        await ctx.channel.send("https://thumbs.gfycat.com/"+mydict[idString]+"-mobile.mp4")
+    elif gifProcess:
+        emojiImage = Image.open(grabImage(url))
+        await processGifImage(ctx,emojiImage,idString,False)
+    else:
+        emojiImage = Image.open(grabImage(url)).convert('RGBA')
+        await processStaticImage(ctx,emojiImage,idString)
+        
 
-@bot.command(name='shake2')
-async def nine_eight(ctx, test):
-        start = test.find(":",3)+1
-        stri2 = test[start:]
-        stri3 = stri2[:-1]
-        if stri3 == '681244980593164336':
-            shorts = True
-        else:
-            shorts = False
-        if shorts:
-            one1 = short.copy()
-        else:
-            one1 = one.copy()
-        two2 = two.copy()
-        ##await ctx.send("https://cdn.discordapp.com/emojis/"+stri3+".png")
-        url = "https://cdn.discordapp.com/emojis/"+stri3
-        if exists(url+".gif"):
-            gifProcess = True
-            pog = download(url+".gif",gifProcess)
-            stri3 = stri3+"rand"
-        else:
-            gifProcess = False
-            pog = download(url+".png",gifProcess)
-            pog = Image.open("whutt.png")
-            ##pog.save("whatif.png")
-        if gifProcess and stri3 not in mydict:
-            images = []
-            Offset1 = []
-            Offset2 = []
-            pog = Image.open("whutt.gif")
-            ##pog.show()
-            totalFrames = pog.n_frames
-            gifDuration = pog.info['duration']
-            for i in range(0, 7, 1):
-                Offset1.append(random.randint(0,totalFrames))
-            for i in range(0, 2, 1):
-                Offset2.append(random.randint(0,totalFrames))
-            if totalFrames < 200:
-                for frame in range(0, totalFrames, 1):
-                    onec = one.copy()
-                    twoc = two.copy()
-                    pogc = pog
-                    ##pogc.seek(frame)
-                    ##pogc2 = pogc.copy().convert('RGBA')
-                    for i in range(leng):
-                        newframe = frame + Offset1[i]
-                        if newframe >= totalFrames:
-                            newframe = newframe - totalFrames
-                        pogc.seek(newframe)
-                        pogc2 = pogc.copy().convert('RGBA')
-                        onec.alpha_composite(pogc2.resize((70,70), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
-                    comp2 = Image.alpha_composite(onec,twoc)
-                    for i in range(leng2):
-                        newframe = frame + Offset2[i]
-                        if newframe >= totalFrames:
-                            newframe = newframe - totalFrames
-                        pogc.seek(newframe)
-                        pogc2 = pogc.copy().convert('RGBA')
-                        comp2.alpha_composite(pogc2.resize((70,70), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
-                    images.append(comp2)
-                images[0].save('CantHoldAllThese.gif', save_all=True, append_images=images[1:], duration=gifDuration, loop=0, optimize=True)
-                optimize("CantHoldAllThese.gif")
-                print(os.path.getsize('CantHoldAllThese.gif'))
-                await ctx.channel.send("https://thumbs.gfycat.com/"+upload_gif(stri3)+"-mobile.mp4")
-                ##await ctx.channel.send(file=discord.File('CantHoldAllThese.gif'))
-            else:
-                await ctx.channel.send("Emoji too long")
-        elif gifProcess and stri3 in mydict:
-            await ctx.channel.send("wow that worked")
-            await ctx.channel.send("https://thumbs.gfycat.com/"+mydict[stri3]+"-mobile.mp4")
-        else:
-            for i in range(leng):
-                ##print(i)
-                one1.alpha_composite(pog.resize((70,70), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
-            comp2 = Image.alpha_composite(one1,two2)
-            for i in range(leng2):
-                comp2.alpha_composite(pog.resize((70,70), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
-            ##comp2.show()
-            comp2.save('CantHoldAllThese.png')
-            await ctx.channel.send(file=discord.File('CantHoldAllThese.png'))
-            ##await ctx.channel.send(upload_png('CantHoldAllThese.png'))
+@bot.command(name='shake')
+
+async def shaking(ctx, emojiStr):
+    lookStart = emojiStr.find(":",3)+1
+    idString = emojiStr[lookStart:][:-1]
+    url = "https://cdn.discordapp.com/emojis/"+idString
+    gifProcess = exists(url+".gif")
+    if gifProcess and idString+'rand' in mydict:
+        await ctx.channel.send("https://thumbs.gfycat.com/"+mydict[idString+'rand']+"-mobile.mp4")
+    elif gifProcess:
+        emojiImage = Image.open(grabImage(url))
+        await processGifImage(ctx,emojiImage,idString,True)
+    else:
+        emojiImage = Image.open(grabImage(url)).convert('RGBA')
+        await processStaticImage(ctx,emojiImage,idString)
+
 
 bot.run(TOKEN)
