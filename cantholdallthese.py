@@ -1,5 +1,5 @@
-from PIL import Image, ImageFilter, GifImagePlugin, ImageSequence
-import os, glob, time
+from PIL import Image, ImageFilter, GifImagePlugin, ImageSequence, ImageChops, ImageDraw
+import os, glob, time, asyncio
 import math, random
 import io
 import discord
@@ -214,11 +214,170 @@ async def processGifImage(context,emoGif,emojiId,rando):
         images[0].save(emojiId+'.gif', save_all=True, append_images=images[1:], duration=gifDuration, loop=0, optimize=True)
         optimize(emojiId+'.gif')
         which = 'rand' if rando else ''
-        await context.channel.send("https://thumbs.gfycat.com/"+upload_gfy(emojiId,which)+"-mobile.mp4")
+        await context.channel.send("https://giant.gfycat.com/"+upload_gfy(emojiId,which)+".webm")
         ##await ctx.channel.send(file=discord.File('CantHoldAllThese.gif'))
     else:
         await context.channel.send("Emoji too long")
 
+async def processShookImage(context,emoPng,emojiId):
+    images = []
+    frames = 24-1
+    ##img = Image.new('RGBA', (80,80), (0, 0 ,0 ,0))
+    canvas = Image.open('canvas.png')
+    frequency = 3
+    frequency2 = 6
+    emoPng = emoPng.convert('RGBA')
+    for i in range(0, frames, 1):
+        ##canvas = img2.copy()
+        ratio = emoPng.height/emoPng.width
+        if emoPng.width > 80:
+            image = emoPng.copy().resize((80,round(80*ratio)), Image.BICUBIC)
+        else:
+            image = emoPng.copy().resize((80,round(80*ratio)), Image.NEAREST)
+        image = image.rotate(round(4*math.sin(((2*math.pi)/frequency)*(i-frequency))), Image.BICUBIC, expand=0)
+        canvas.paste(image)
+        image = canvas
+        offsetX = round(1*0.8*math.sin(((2*math.pi)/frequency2)*(i-frequency2)))
+        offsetY = round(1*0.2*math.sin(((2*math.pi)/frequency2)*(i-frequency2)))
+        image2 = ImageChops.offset(image,offsetX,offsetY)
+        croppedImage = image2.crop((0,0,80,80))
+        alpha = croppedImage.split()[3]
+        croppedImage = croppedImage.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+        mask = Image.eval(alpha, lambda a: 255 if a <=128 else 0)
+        croppedImage.paste(255, mask)
+        images.append(croppedImage)
+    images[0].save(emojiId+'shook.gif', save_all=True, append_images=images[1:], duration=20, loop=0, optimize=False, transparency=255, disposal=2)
+    ##optimize(emojiId+'shook.gif')
+    await context.channel.send(file=discord.File(emojiId+'shook.gif'))
+    os.remove(emojiId+'shook.gif')
+
+async def processMoreShookImage(context,emoPng,emojiId):
+    images = []
+    frames = 24-1
+    ##img = Image.new('RGBA', (80,80), (0, 0 ,0 ,0))
+    canvas = Image.open('canvas.png')
+    frequency = 3
+    frequency2 = 6
+    emoPng = emoPng.convert('RGBA')
+    for i in range(0, frames, 1):
+        ##canvas = img2.copy()
+        ratio = emoPng.height/emoPng.width
+        if emoPng.width > 80:
+            image = emoPng.copy().resize((80,round(80*ratio)), Image.BICUBIC)
+        else:
+            image = emoPng.copy().resize((80,round(80*ratio)), Image.NEAREST)
+        image = image.rotate(round(8*math.sin(((2*math.pi)/frequency)*(i-frequency))), Image.BICUBIC, expand=0)
+        canvas.paste(image)
+        image = canvas
+        offsetX = round(2*0.8*math.sin(((2*math.pi)/frequency2)*(i-frequency2)))
+        offsetY = round(2*0.2*math.sin(((2*math.pi)/frequency2)*(i-frequency2)))
+        image2 = ImageChops.offset(image,offsetX,offsetY)
+        croppedImage = image2.crop((0,0,80,80))
+        alpha = croppedImage.split()[3]
+        croppedImage = croppedImage.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+        mask = Image.eval(alpha, lambda a: 255 if a <=128 else 0)
+        croppedImage.paste(255, mask)
+        images.append(croppedImage)
+    images[0].save(emojiId+'moreshook.gif', save_all=True, append_images=images[1:], duration=20, loop=0, optimize=False, transparency=255, disposal=2)
+    ##optimize(emojiId+'moreshook.gif')
+    await context.channel.send(file=discord.File(emojiId+'moreshook.gif'))
+    os.remove(emojiId+'moreshook.gif')
+
+async def processCrazyShookImage(context,emoPng,emojiId):
+    images = []
+    frames = 60-1
+    ##img = Image.new('RGBA', (80,80), (0, 0 ,0 ,0))
+    canvas = Image.open('canvas.png')
+    frequency = 3
+    frequency2 = 6
+    emoPng = emoPng.convert('RGBA')
+    for i in range(0, frames, 1):
+        ##canvas = img2.copy()
+        ratio = emoPng.height/emoPng.width
+        if emoPng.width > 80:
+            image = emoPng.copy().resize((80,round(80*ratio)), Image.BICUBIC)
+        else:
+            image = emoPng.copy().resize((80,round(80*ratio)), Image.NEAREST)
+        image = image.rotate(round(8*math.sin(((2*math.pi)/frequency)*(i-frequency))+(i*6)), Image.BICUBIC, expand=0)
+        offsetX = round(2*0.8*math.sin(((2*math.pi)/frequency2)*(i-frequency2))+((i*80)/30))
+        offsetY = round(2*0.2*math.sin(((2*math.pi)/frequency2)*(i-frequency2))+((i*80*ratio)/60))
+        image2 = ImageChops.offset(image,offsetX,offsetY)
+        croppedImage = image2
+        alpha = croppedImage.split()[3]
+        croppedImage = croppedImage.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+        mask = Image.eval(alpha, lambda a: 255 if a <=128 else 0)
+        croppedImage.paste(255, mask)
+        images.append(croppedImage)
+    images[0].save(emojiId+'crazyshook.gif', save_all=True, append_images=images[1:], duration=20, loop=0, optimize=False, transparency=255, disposal=2)
+    ##optimize(emojiId+'crazyshook.gif')
+    await context.channel.send(file=discord.File(emojiId+'crazyshook.gif'))
+    os.remove(emojiId+'crazyshook.gif')
+
+async def processSpaceImage(context,emoPng,emojiId):
+    images = []
+    frames = 480-1
+    img2 = Image.open('canvas.png')
+    frequency = 3
+    frequency2 = 6
+    xStart = []
+    yStart = []
+    dist = 100
+    emoPng = emoPng.convert('RGBA')
+    for i in range(0, 4, 1):
+        rotations = random.randint(0,360)*(math.pi/180)
+        xStart.append(round(math.sin(rotations)*dist))
+        yStart.append(round(math.cos(rotations)*dist))
+    print(xStart)
+    print(yStart)
+    X = 0
+    Y = 0
+    stage = 0
+    rotMul = 1
+    interval = 120
+    for i in range(0, frames, 1):
+        if i == (interval):
+            stage = 1
+            X = 0
+            Y = 0
+        if i == (interval*2):
+            stage = 2
+            X = 0
+            Y = 0
+        if i == (interval*3):
+            stage = 3
+            X = 0
+            Y = 0
+            rotMul = 3
+        canvas = img2.copy()
+        ratio = emoPng.height/emoPng.width
+        if emoPng.width > 60:
+            image = emoPng.copy().resize((60,round(60*ratio)), Image.BICUBIC)
+        else:
+            image = emoPng.copy().resize((60,round(60*ratio)), Image.NEAREST)
+        image = image.rotate(i*2*rotMul, Image.BICUBIC, expand=1)
+        xOff = round((60-image.width)/2)
+        yOff = round(((60*ratio)-image.height)/2)
+        if i == 50:
+            print(image.width)
+        ##the below static number is 400 minus width then divided by 2
+        canvas.alpha_composite(image,(170+xStart[stage]+xOff,170+yStart[stage]+yOff))
+        X -= xStart[stage]*0.02
+        Y -= yStart[stage]*0.02
+        ##canvas.alpha_composite(image,(160,160))
+        offsetX = round(X)
+        offsetY = round(Y)
+        image2 = ImageChops.offset(canvas,offsetX,offsetY)
+        croppedImage = image2.crop((160,160,240,240))
+        ##croppedImage = image2.crop((0,0,400,400))
+        alpha = croppedImage.split()[3]
+        croppedImage = croppedImage.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+        mask = Image.eval(alpha, lambda a: 255 if a <=128 else 0)
+        croppedImage.paste(255, mask)
+        images.append(croppedImage)
+    images[0].save(emojiId+'space.gif', save_all=True, append_images=images[1:], duration=40, loop=0, optimize=False, transparency=255, disposal=2)
+    ##optimize(emojiId+'space.gif')
+    await context.channel.send(file=discord.File(emojiId+'space.gif'))
+    os.remove(emojiId+'space.gif')
 
 ##client = discord.Client()
 ##@client.event
@@ -233,13 +392,14 @@ bot = commands.Bot(command_prefix='!')
 @bot.command(name='hold')
 async def holding(ctx, emojiStr):
     ##print(emojiStr)
+    idString = emojiStr[emojiStr.find('<'):]
     lookStart = emojiStr.find(":",3)+1
-    idString = emojiStr[lookStart:][:-1]
+    idString = idString[lookStart:][:-1]
     shorts = True if idString == '681244980593164336' else False
     url = "https://cdn.discordapp.com/emojis/"+idString
     gifProcess = exists(url+".gif")
     if gifProcess and idString in mydict:
-        await ctx.channel.send("https://thumbs.gfycat.com/"+mydict[idString]+"-mobile.mp4")
+        await ctx.channel.send("https://giant.gfycat.com/"+mydict[idString]+".webm")
     elif gifProcess:
         emojiImage = Image.open(grabImage(url))
         await processGifImage(ctx,emojiImage,idString,False)
@@ -249,20 +409,215 @@ async def holding(ctx, emojiStr):
         
 
 @bot.command(name='shake')
-
 async def shaking(ctx, emojiStr):
+    idString = emojiStr[emojiStr.find('<'):]
     lookStart = emojiStr.find(":",3)+1
-    idString = emojiStr[lookStart:][:-1]
+    idString = idString[lookStart:][:-1]
     url = "https://cdn.discordapp.com/emojis/"+idString
     gifProcess = exists(url+".gif")
     if gifProcess and idString+'rand' in mydict:
-        await ctx.channel.send("https://thumbs.gfycat.com/"+mydict[idString+'rand']+"-mobile.mp4")
+        await ctx.channel.send("https://giant.gfycat.com/"+mydict[idString+'rand']+".webm")
     elif gifProcess:
         emojiImage = Image.open(grabImage(url))
         await processGifImage(ctx,emojiImage,idString,True)
     else:
         emojiImage = Image.open(grabImage(url)).convert('RGBA')
         await processStaticImage(ctx,emojiImage,idString)
+
+@bot.command(name='wide')
+async def widening(context, *, content):
+    print(content)
+    contents = content.split(">")
+    print(contents)
+    length = len(contents)
+    for i in range(length):
+        contents[i] = contents[i][contents[i].find('<'):]
+        lookStart = contents[i].find(":",4)+1
+        contents[i] = contents[i][lookStart:]
+        if len(contents[i]) < 2:
+            del contents[i]
+    print(contents)
+    length = len(contents)-1
+    one1 = Image.open("Base.png").copy()
+    two1 = Image.open("Arm.png").copy()
+    ## w*h = a, a = 4900, w = wR*h, (wR*h)*h = a, wR*h^2 = a
+    for i in range(leng):
+        url = "https://cdn.discordapp.com/emojis/"+contents[random.randint(0,length)]+'.png'
+        print(url)
+        emoPng = Image.open(grabImage(url))
+        wRatio = emoPng.width/emoPng.height
+        height = round(math.sqrt(4900/wRatio))
+        width = round(wRatio*height)
+        one1.alpha_composite(emoPng.resize((width,height), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
+    comp2 = Image.alpha_composite(one1,two1)
+    for i in range(leng2):
+        url = "https://cdn.discordapp.com/emojis/"+contents[random.randint(0,length)]+'.png'
+        emoPng = Image.open(grabImage(url))
+        wRatio = emoPng.width/emoPng.height
+        height = round(math.sqrt(4900/wRatio))
+        width = round(wRatio*height)
+        comp2.alpha_composite(emoPng.resize((width,height), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
+    file = ''.join(contents)
+    print(contents)
+    comp2.save(file+'.png', format='PNG')
+    await context.channel.send(file=discord.File(file+'.png',filename="CantHoldAllThese.png"))
+    os.remove(file+'.png')
+
+@bot.command(name='shook')
+async def shooking(context, emojiStr):
+    idString = emojiStr[emojiStr.find('<'):]
+    lookStart = emojiStr.find(":",3)+1
+    idString = idString[lookStart:][:-1]
+    url = "https://cdn.discordapp.com/emojis/"+idString
+    gifProcess = exists(url+".gif")
+    if not gifProcess and idString+'shook' in mydict:
+        await ctx.channel.send("https://giant.gfycat.com/"+mydict[idString]+".webm")
+    elif not gifProcess:
+        emojiImage = Image.open(grabImage(url))
+        await processShookImage(context,emojiImage,idString)
+    else:
+        await context.channel.send('Gif emoji not supported at this time. :-(')
+
+@bot.command(name='moreshook')
+async def moreshooking(context, emojiStr):
+    idString = emojiStr[emojiStr.find('<'):]
+    lookStart = emojiStr.find(":",3)+1
+    idString = idString[lookStart:][:-1]
+    url = "https://cdn.discordapp.com/emojis/"+idString
+    gifProcess = exists(url+".gif")
+    if not gifProcess and idString+'moreshook' in mydict:
+        await ctx.channel.send("https://giant.gfycat.com/"+mydict[idString]+".webm")
+    elif not gifProcess:
+        emojiImage = Image.open(grabImage(url))
+        await processMoreShookImage(context,emojiImage,idString)
+    else:
+        await context.channel.send('Gif emoji not supported at this time. :-(')
+
+@bot.command(name='weee')
+async def crazyshooking(context, emojiStr):
+    idString = emojiStr[emojiStr.find('<'):]
+    lookStart = emojiStr.find(":",3)+1
+    idString = idString[lookStart:][:-1]
+    url = "https://cdn.discordapp.com/emojis/"+idString
+    gifProcess = exists(url+".gif")
+    if not gifProcess and idString+'crazyshook' in mydict:
+        await ctx.channel.send("https://giant.gfycat.com/"+mydict[idString]+".webm")
+    elif not gifProcess:
+        emojiImage = Image.open(grabImage(url))
+        await processCrazyShookImage(context,emojiImage,idString)
+    else:
+        await context.channel.send('Gif emoji not supported at this time. :-(')
+
+@bot.command(name='space')
+async def spacey(context, emojiStr):
+    idString = emojiStr[emojiStr.find('<'):]
+    lookStart = emojiStr.find(":",3)+1
+    idString = idString[lookStart:][:-1]
+    url = "https://cdn.discordapp.com/emojis/"+idString
+    gifProcess = exists(url+".gif")
+    if not gifProcess and idString+'space' in mydict:
+        await ctx.channel.send("https://giant.gfycat.com/"+mydict[idString]+".webm")
+    elif not gifProcess:
+        emojiImage = Image.open(grabImage(url))
+        await processSpaceImage(context,emojiImage,idString)
+    else:
+        await context.channel.send('Gif emoji not supported at this time. :-(')
+        
+##@bot.command(name='wide3')
+##async def widening2(context, *, content):
+##    print(content)
+##    contents = content.split(">")
+##    contentsImages = []
+##    endFrame = []
+##    durations = []
+##    gifDuration = 0
+##    maxFrame = 0;
+##    images = []
+##    length = len(contents)
+##    for i in range(length):
+##        contents[i] = contents[i][contents[i].find('<'):]
+##        lookStart = contents[i].find(":",4)+1
+##        contents[i] = contents[i][lookStart:]
+##        if len(contents[i]) < 2:
+##            del contents[i]
+##    length = len(contents)-1
+##    for i in range(len(contents)):
+##        url = "https://cdn.discordapp.com/emojis/"+contents[i]
+##        print(url)
+##        contentsImages.append(Image.open(grabImage(url)))
+##        if exists(url+".gif"):
+####            print(contentsImages[i].info)
+####            print(contentsImages[i].n_frames)
+####            print('prior url is gif')
+##            endFrame.append(contentsImages[i].n_frames)
+##            if contentsImages[i].info['duration'] == 0:
+##                durations.append(15*contentsImages[i].n_frames)
+##            else:
+##                durations.append(contentsImages[i].info['duration'])
+##        else:
+##            print('prior url is not gif')
+##            endFrame.append(1)
+##            durations.append(1)
+##        if gifDuration < durations[i]:
+##            gifDuration = durations[i]
+##        if maxFrame < (endFrame[i]):
+##            maxFrame = endFrame[i]
+##    one1 = Image.open("Base.png").copy()
+##    two1 = Image.open("Arm.png").copy()
+##    maxFrame = (maxFrame*2)
+##    set1 = []
+##    set2 = []
+##    for i in range(0, 7, 1):
+##        set1.append(contentsImages[i])
+##        print(i)
+##    for i in range(0, 2, 1):
+##        set2.append(contentsImages[i+6])
+##        print(i+6)
+##    ## w*h = a, a = 4900, w = wR*h, (wR*h)*h = a, wR*h^2 = a
+##    for frame in range(0, maxFrame, 1):
+##        ##print(frame)
+##        one1 = Image.open("Base.png").copy()
+##        for i in range(leng):
+##            ##numb of playbacks is a rounded of max duration divided by duration, rounded to be a whole number
+##            ##max frame of single is total frames divided by number of playbacks to be done, rounded because ints only
+##            ##frame progress is ratio times progress through total; ratio being total frames of gif times playbacks to be done, divided by max or somthn
+##            testRatio = maxFrame/(endFrame[i]*2) if endFrame[i] > 0 else 1
+##            print(endFrame[i])
+##            print(durations[i])
+##            currentFrame = math.floor(testRatio*(frame/(gifDuration/durations[i])))
+##            print('part 1:'+str(i))
+##            emoGif = set1[i]
+##            emoGif.seek(currentFrame%endFrame[i])
+##            emoPng = emoGif.copy().convert('RGBA')
+##            wRatio = emoPng.width/emoPng.height
+##            height = round(math.sqrt(4900/wRatio))
+##            width = round(wRatio*height)
+##            one1.alpha_composite(emoPng.resize((width,height), Image.LANCZOS).rotate(rot[i], Image.BICUBIC, expand=1),(X[i],Y[i]))
+##        comp2 = Image.alpha_composite(one1,two1)
+##        for i in range(leng2):
+##            currentFrame = math.floor((maxFrame/(endFrame[i]*2))*(frame/(gifDuration/durations[i])))
+##            print('part2:'+str(i))
+##            emoGif = set2[i]
+##            if i == 2:
+##                print(currentFrame)
+##                print(endFrame[i])
+##            emoGif.seek(currentFrame%endFrame[i])
+##            emoPng = emoGif.copy().convert('RGBA')
+##            wRatio = emoPng.width/emoPng.height
+##            height = round(math.sqrt(4900/wRatio))
+##            width = round(wRatio*height)
+##            comp2.alpha_composite(emoPng.resize((width,height), Image.LANCZOS).rotate(rot2[i], Image.BICUBIC, expand=1),(X2[i],Y2[i]))
+##        images.append(comp2)
+##    file = ''.join(contents)
+##    images[0].save(file+'.gif', save_all=True, append_images=images[1:], duration=gifDuration, loop=0, optimize=True)
+##    optimize(file+'.gif')
+##    await context.channel.send(file=discord.File(file+'.gif'))
+
+
+@bot.command(name='read')
+async def reading(context, *, message):
+    await context.channel.send(message)
+        
 
 
 bot.run(TOKEN)
