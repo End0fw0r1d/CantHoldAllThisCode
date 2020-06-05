@@ -1,4 +1,4 @@
-from PIL import Image, ImageFilter, GifImagePlugin, ImageSequence, ImageChops, ImageDraw
+from PIL import Image, ImageFilter, GifImagePlugin, ImageSequence, ImageChops, ImageDraw, ImageEnhance, ImageOps
 import os, glob, time, asyncio
 import math, random
 import io
@@ -15,8 +15,10 @@ from dotenv import load_dotenv
 from pygifsicle import optimize
 from requests_toolbelt import MultipartEncoder
 from io import BytesIO
+from mcstatus import MinecraftServer
 ##from imgurpython import ImgurClient
 
+minecraftIP = '216.221.197.172:25565'
 X = [226,160,280,198,255,280,160]
 Y = [515,530,540,550,550,585,645]
 X2 = [310,220]
@@ -287,20 +289,20 @@ async def processCrazyShookImage(context,emoPng,emojiId):
     images = []
     frames = 60-1
     ##img = Image.new('RGBA', (80,80), (0, 0 ,0 ,0))
-    canvas = Image.open('canvas.png')
+    canvas = Image.open('canvas.png').resize((50,50))
     frequency = 3
     frequency2 = 6
     emoPng = emoPng.convert('RGBA')
     for i in range(0, frames, 1):
         ##canvas = img2.copy()
         ratio = emoPng.height/emoPng.width
-        if emoPng.width > 80:
-            image = emoPng.copy().resize((80,round(80*ratio)), Image.BICUBIC)
+        if emoPng.width > 50:
+            image = emoPng.copy().resize((50,round(50*ratio)), Image.BICUBIC)
         else:
-            image = emoPng.copy().resize((80,round(80*ratio)), Image.NEAREST)
+            image = emoPng.copy().resize((50,round(50*ratio)), Image.NEAREST)
         image = image.rotate(round(8*math.sin(((2*math.pi)/frequency)*(i-frequency))+(i*6)), Image.BICUBIC, expand=0)
-        offsetX = round(2*0.8*math.sin(((2*math.pi)/frequency2)*(i-frequency2))+((i*80)/30))
-        offsetY = round(2*0.2*math.sin(((2*math.pi)/frequency2)*(i-frequency2))+((i*80*ratio)/60))
+        offsetX = round(2*0.8*math.sin(((2*math.pi)/frequency2)*(i-frequency2))+((i*50)/30))
+        offsetY = round(2*0.2*math.sin(((2*math.pi)/frequency2)*(i-frequency2))+((i*50*ratio)/60))
         image2 = ImageChops.offset(image,offsetX,offsetY)
         croppedImage = image2
         alpha = croppedImage.split()[3]
@@ -312,6 +314,63 @@ async def processCrazyShookImage(context,emoPng,emojiId):
     ##optimize(emojiId+'crazyshook.gif')
     await context.channel.send(file=discord.File(emojiId+'crazyshook.gif'))
     os.remove(emojiId+'crazyshook.gif')
+
+async def processNukeImage(context,emoPng,emojiId):
+    images = []
+    frames = 240-1
+    ##img = Image.new('RGBA', (160,160), (0, 0 ,0 ,0))
+    canvas = Image.open('canvas.png')
+    frequency = 3
+    frequency2 = 6
+    emoPng = emoPng.convert('RGBA')
+    for i in range(0, frames, 1):
+        mult = (i/287)*1.9+0.2
+        if i > 159:
+            endt = (i-160)
+            exp = 3**(endt/12)-1
+            if i==160:
+                print(i, exp)
+        else:
+            exp = 0
+            endt = 0
+        ##canvas = img.copy()
+        ratio = emoPng.height/emoPng.width
+        if emoPng.width > 80:
+            image = emoPng.copy().resize((80,round(80*ratio)), Image.BICUBIC)
+        else:
+            image = emoPng.copy().resize((80,round(80*ratio)), Image.NEAREST)
+        image = image.rotate(round(mult*8*math.sin(((2*math.pi)/frequency)*(i-frequency))), Image.BICUBIC, expand=0)
+        canvas.paste(image)
+        image = canvas
+        offsetX = round(mult*3*0.8*math.sin(((2*math.pi)/frequency2)*(i-frequency2)))
+        offsetY = round(mult*3*0.2*math.sin(((2*math.pi)/frequency2)*(i-frequency2)))
+        image2 = ImageChops.offset(image,offsetX,offsetY)
+        croppedImage = image2.crop((0,0,80,round(80*ratio)))
+        alpha = croppedImage.split()[3]
+        cropL = croppedImage.load()
+        if i > 159:
+            expt = 1.3**(endt/20)-1
+            for y in range(0,round(80*ratio),1):
+                for x in range(0,80,1):
+                    r,g,b,a = cropL[x,y]
+                    rrat = (255-r)/80
+                    grat = (255-g)/80
+                    brat = (255-b)/80
+                    rend = round(rrat*expt)+r if round(rrat*expt)+r < 255 else 255
+                    gend = round(grat*expt)+g if round(grat*expt)+g < 255 else 255
+                    bend = round(brat*expt)+b if round(brat*expt)+b < 255 else 255
+                    if a > 0:
+                        cropL[x,y] = (rend,gend,bend,255)
+        croppedImage = ImageEnhance.Brightness(croppedImage).enhance(exp+1)
+        ##croppedImage = croppedImage.convert('RGB').convert('P', palette=Image.ADAPTIVE, colors=255)
+        croppedImage = croppedImage.convert('P', palette=Image.ADAPTIVE, colors=255)
+        croppedImage.quantize(30)
+        mask = Image.eval(alpha, lambda a: 255 if a <=128 else 0)
+        croppedImage.paste(255, mask)
+        images.append(croppedImage)
+    images[0].save(emojiId+'nuke.gif', save_all=True, append_images=images[1:], duration=20, loop=0, optimize=False, transparency=255, disposal=2)
+    await context.channel.send(file=discord.File(emojiId+'nuke.gif'))
+    os.remove(emojiId+'nuke.gif')
 
 async def processSpaceImage(context,emoPng,emojiId):
     images = []
@@ -379,6 +438,76 @@ async def processSpaceImage(context,emoPng,emojiId):
     await context.channel.send(file=discord.File(emojiId+'space.gif'))
     os.remove(emojiId+'space.gif')
 
+async def notBttv(context, emoPng, emojiId, arg, ex, ey, roty, scale):
+    print(arg,ex,ey,roty,scale)
+    maskedArgs = ['hazmat','hazmatf']
+    emoPng = emoPng.convert('RGBA')
+    overlay = Image.open(arg+'.png').convert('RGBA')
+    canvas80 = Image.open('canvas.png').resize((80,80))
+    canvas2 = canvas80.copy()
+    ratio = emoPng.height/emoPng.width
+    ratio2 = canvas80.height/canvas80.width
+    if arg in maskedArgs:
+        needMask = True
+    else:
+        needMask = False
+    if emoPng.width > 70:
+        image = emoPng.copy().resize((70,round(70*ratio)), Image.BICUBIC)
+    else:
+        image = emoPng.copy().resize((70,round(70*ratio)), Image.NEAREST)
+    if overlay.width > 80:
+        image2 = overlay.copy().resize((80,round(80*ratio2)), Image.BICUBIC)
+    else:
+        image2 = overlay.copy().resize((80,round(80*ratio2)), Image.NEAREST)
+    if needMask:
+        print('masking')
+        if scale < 1: ##rescaling if scale is not 1
+            image = image.copy().resize((round(image.width*scale),round(image.height*scale)), Image.BICUBIC)
+        elif scale > 1:
+            image = image.copy().resize((round(image.width*scale),round(image.height*scale)), Image.NEAREST)
+        image = image.rotate(float(roty), Image.BICUBIC, expand=1)
+        if image.height > 70 or image.width > 70:
+            image = image.crop((((image.width-70)/2),((image.height-70)/2),image.width-((image.width-70)/2),image.height-((image.height-70)/2)))
+        canvas80.alpha_composite(image,(round((80-image.width)/2)+5+ex,round((80-image.height)/2)+5+ey))
+        mask = Image.open(arg+'mask.png').convert('RGBA')
+        mask = mask.copy().resize((80,round(80*ratio2)), Image.NEAREST)
+        canvas2.alpha_composite(mask,(round((80-image2.width)/2),0))
+        mask = canvas2.convert('L')
+        maskL = mask.load()
+        canvasL = canvas80.load()
+        ##print(mask.height,mask.width)
+        for y in range(0,80,1):
+            for x in range(0,80,1):
+                num = math.floor((maskL[x,y]*10)/256)
+                if maskL[x,y] > 10:
+                    canvasL[x,y] = (0,0,0,0)
+    if needMask:
+        canvas80.alpha_composite(image2,(round((80-image2.width)/2),0))
+    else:
+        canvas80.alpha_composite(image,(round((80-image.width)/2)+5,round((80-image.height)/2)+5))
+        image2 = image2.rotate(float(roty), Image.BICUBIC, expand=1)
+        image2 = ImageChops.offset(image2,ex,ey)
+        if scale < 1: ##rescaling if scale is not 1
+            image2 = image2.copy().resize((round(image2.width*scale),round(image2.height*scale)), Image.BICUBIC)
+        elif scale > 1:
+            image2 = image2.copy().resize((round(image2.width*scale),round(image2.height*scale)), Image.NEAREST)
+        image2 = image2.crop((((image2.width-80)/2),((image2.height-80)/2),image2.width-((image2.width-80)/2),image2.height-((image2.height-80)/2)))
+        canvas80.alpha_composite(image2,(round((80-image2.width)/2),round((80-image2.height)/2)))
+    canvas80.convert('RGBA')
+    canvas80.save(emojiId+'overlay.png')
+    await context.channel.send(file=discord.File(emojiId+'overlay.png'))
+    os.remove(emojiId+'overlay.png')
+    
+    
+async def getId(emojiStr):
+    idString = emojiStr[emojiStr.find('<'):]
+    lookStart = emojiStr.find(":",3)+1
+    idString = idString[lookStart:][:-1]
+    url = "https://cdn.discordapp.com/emojis/"+idString
+    gifProcess = exists(url+".gif")
+    emojiValid = exists(url+".png")
+    return idString, gifProcess, emojiValid
+
 ##client = discord.Client()
 ##@client.event
 ##async def on_message(message):
@@ -388,6 +517,17 @@ async def processSpaceImage(context,emoPng,emojiId):
 ##client.run(TOKEN)
 
 bot = commands.Bot(command_prefix='!')
+
+@bot.event
+async def on_ready():
+    while True:
+        server = MinecraftServer.lookup(minecraftIP)
+        status = server.status()
+        string = "Boyville, population: {0}".format(status.players.online)
+        activity = discord.Game(name=string)
+        await bot.change_presence(status=discord.Status.online, activity=activity)
+        await asyncio.sleep(60)
+    
 
 @bot.command(name='hold')
 async def holding(ctx, emojiStr):
@@ -465,9 +605,11 @@ async def widening(context, *, content):
 
 @bot.command(name='shook')
 async def shooking(context, emojiStr):
+    print(emojiStr)
     idString = emojiStr[emojiStr.find('<'):]
     lookStart = emojiStr.find(":",3)+1
     idString = idString[lookStart:][:-1]
+    print(idString)
     url = "https://cdn.discordapp.com/emojis/"+idString
     gifProcess = exists(url+".gif")
     if not gifProcess and idString+'shook' in mydict:
@@ -490,6 +632,21 @@ async def moreshooking(context, emojiStr):
     elif not gifProcess:
         emojiImage = Image.open(grabImage(url))
         await processMoreShookImage(context,emojiImage,idString)
+    else:
+        await context.channel.send('Gif emoji not supported at this time. :-(')
+
+@bot.command(name='nuke')
+async def moreshooking(context, emojiStr):
+    idString = emojiStr[emojiStr.find('<'):]
+    lookStart = emojiStr.find(":",3)+1
+    idString = idString[lookStart:][:-1]
+    url = "https://cdn.discordapp.com/emojis/"+idString
+    gifProcess = exists(url+".gif")
+    if not gifProcess and idString+'nuke' in mydict:
+        await ctx.channel.send("https://giant.gfycat.com/"+mydict[idString]+".webm")
+    elif not gifProcess:
+        emojiImage = Image.open(grabImage(url))
+        await processNukeImage(context,emojiImage,idString)
     else:
         await context.channel.send('Gif emoji not supported at this time. :-(')
 
@@ -522,6 +679,66 @@ async def spacey(context, emojiStr):
         await processSpaceImage(context,emojiImage,idString)
     else:
         await context.channel.send('Gif emoji not supported at this time. :-(')
+
+@bot.command(name='boys')
+async def boysOnline(context):
+    server = MinecraftServer.lookup(minecraftIP)
+    status = server.status()
+    await context.channel.send("There are {0} boys online, query took {1} ms".format(status.players.online, status.latency))
+    if status.players.online > 0:
+        query = server.query()
+        await context.channel.send("The following boys are online: {0}".format(", ".join(query.players.names)))
+
+@bot.command(name='listboys')
+async def boysList(context):
+    server = MinecraftServer.lookup(minecraftIP)
+    query = server.query()
+    await context.channel.send("The following boys are online: {0}".format(", ".join(query.players.names)))
+
+@bot.command(name='overlay')
+async def overlaying(context, *, message):
+    overlays = ['hazmat', 'mask', 'hazmatf']
+    noneValid = False
+    isGif = False
+    if message != None:
+        args = list(message.split(" "))
+    validLen = False
+    ##print(args)
+    if len(args) == 2 or len(args) == 6:
+        validLen = True
+    if message != None and validLen:
+        concatId, isGif, isValid = await getId(args[0])
+        if not isValid:
+            concatId, isGif, isValid = await getId(args[1])
+            arg2 = args[0]
+            if not isValid:
+                noneValid = True
+        else:
+            arg2 = args[1]
+        if not noneValid and not isGif:
+            if arg2 in overlays:
+                url = "https://cdn.discordapp.com/emojis/"+concatId
+                emojiImage = Image.open(grabImage(url))
+                if len(args) == 6:
+                    ex = int(args[2])
+                    ey = int(args[3])
+                    roto = float(args[4])
+                    scale = float(args[5])
+                else:
+                    ex = 0
+                    ey = 0
+                    roto = 0
+                    scale = 1
+                await notBttv(context, emojiImage, concatId, arg2, ex, ey, roto, scale)
+            else:
+                await context.channel.send('Valid overlays are: hazmat, mask')
+    if message == None or noneValid or validLen == False:
+        await context.channel.send('Valid overlays are: hazmat, mask')
+        await context.channel.send('Proper format is !overlay <emote> <overlay> [x offset] [y offset] [rotation in degrees] [scale as a mult of 1]')
+        await context.channel.send('Arguments in [] are optional, but must be used all at once if used')
+    if isGif:
+        await context.channel.send('Gif emoji not supported')
+    ##await context.channel.send(message)
         
 ##@bot.command(name='wide3')
 ##async def widening2(context, *, content):
@@ -617,6 +834,12 @@ async def spacey(context, emojiStr):
 @bot.command(name='read')
 async def reading(context, *, message):
     await context.channel.send(message)
+
+@bot.command(name='I')
+async def iguess(context, *, message):
+    if message == 'guess':
+        ##await context.channel.send(file=discord.File('iguess.gif'))
+        await context.channel.send('https://i.imgur.com/MMaciGr.gif')
         
 
 
