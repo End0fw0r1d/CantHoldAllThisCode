@@ -521,9 +521,10 @@ bot = commands.Bot(command_prefix='!')
 @bot.event
 async def on_ready():
     while True:
-        server = MinecraftServer.lookup(minecraftIP)
-        status = server.status()
-        string = "Boyville, population: {0}".format(status.players.online)
+        ##server = MinecraftServer.lookup(minecraftIP)
+        ##status = server.status()
+        ##string = "Boyville, population: {0}".format(status.players.online)
+        string = "I'm a bot and I do bot things"
         activity = discord.Game(name=string)
         await bot.change_presence(status=discord.Status.online, activity=activity)
         await asyncio.sleep(60)
