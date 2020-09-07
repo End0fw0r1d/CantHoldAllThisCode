@@ -16,6 +16,8 @@ After I haven't touched it for a while, I often have to go back and reread old b
 
 It's fairly easy to set up, you just need to roll your own .env file with appropriate credentials in it(which involves making your own bot in discord dev portal to get a token from them) and optionally, if you want gfycat uploads to work for the 2? commands that use it, a gfycat username/password and client ID+secret(albeit, gfycat uploads needs to be changed to a different solution sometime as it apparently doesn't quite work as gfycat was a solution early in the project for gif files too large for discord).
 
+I can't off the top of my head name all the python libraries besides PIL that you need, but just install anything python tells you it can't import because it doesn't exist.
+
 .env needs:
 
 DISCORD_TOKEN=
