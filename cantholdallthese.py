@@ -535,6 +535,7 @@ async def on_ready():
         except:
             activity = discord.Game(name="server is broke")
             await bot.change_presence(status=discord.Status.online, activity=activity)
+            await asyncio.sleep(60)
         
 ##@bot.event
 ##async def on_message(message):
@@ -674,9 +675,20 @@ async def crazyshooking(context, emojiStr):
         await context.channel.send('Gif emoji not supported at this time. :-(')
 
 @bot.command(name='intense')
-async def intensifytext(context, text, intensity):
+async def intensifytext(context, *, message):
     channel = context.message.channel.id
-    os.system('python3 mstest.py '+str(channel)+' '+str(text)+' intense '+str(intensity))
+    args = list(message.split(" "))
+    try:
+        intensity = int(args[-1])
+    except:
+        intensity = 1
+    try:
+        red, blue, green = int(args[-4]),int(args[-3]),int(args[-2])
+    except:
+        red, blue, green = 255,0,0
+    endcut = len(message)-len(str(intensity))-3-len(str(red))-len(str(blue))-len(str(green))
+    text = message[0:endcut]
+    os.system('python3 mstest.py '+str(channel)+' "'+str(text)+'" intense '+str(red)+' '+str(blue)+' '+str(green)+' '+str(intensity))
 
 @bot.command(name='space')
 async def spacey(context, emojiStr):

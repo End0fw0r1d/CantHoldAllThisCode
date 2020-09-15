@@ -2,11 +2,11 @@ from PIL import Image, ImageFilter, GifImagePlugin, ImageFont, ImageSequence, Im
 import os, glob, time, asyncio
 import math, random
 
-def intensifytext(inputText, intensity, emojiId):
+def intensifytext(inputText, intensity, red, blue, green, emojiId):
     canv = Image.open('canvas.png').resize((800,100))
     d1 = ImageDraw.Draw(canv)
     myFont = ImageFont.truetype('font/whitney-semibold.otf',30)
-    d1.text((0,0),inputText, font=myFont, fill=(255,0,0), align='center')
+    d1.text((0,0),inputText, font=myFont, fill=(red,blue,green), align='center')
     xd, yd = myFont.getsize(inputText)
     canv = canv.crop((0,0,xd,yd))
     images = []

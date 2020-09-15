@@ -56,7 +56,8 @@ if args[3] == 'buildstart':
 if args[3] == 'simtest':
     imageFilename = adventuring.simTime(str(args[2]))
 if args[3] == 'intense':
-    imageFilename = intensifytext(str(args[2]),int(args[4]),randId)
+    print(args)
+    imageFilename = intensifytext(str(args[2]),int(args[-1]),int(args[-4]),int(args[-3]),int(args[-2]),randId)
 if args[3] == 'shook':
     if gif == False:
         imageFilename = processShookImage(emojiImage,randId)

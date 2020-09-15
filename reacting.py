@@ -1,4 +1,4 @@
-import os, glob, time, asyncio, discord
+import os, glob, time, asyncio, discord, random
 from discord.ext import commands
 from discord.ext.commands import Bot
 from discord import Emoji
@@ -24,7 +24,10 @@ async def on_message(message):
                 Distance = lev.ratio('shut',substr)
                 if Distance > 0.8:
                     print('yes')
-                    emoji = bot.get_emoji(562674675981746191)
+                    if random.randint(0,10) > 1:
+                        emoji = bot.get_emoji(562674675981746191)
+                    else:
+                        emoji = bot.get_emoji(751114641048076413)
                     await message.add_reaction(emoji)
                     break
                 ind += 1
