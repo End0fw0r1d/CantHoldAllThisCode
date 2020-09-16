@@ -554,6 +554,11 @@ async def on_ready():
 async def fortheglory(context):
     ##glory = Image.open('forthegloryofsatan.jpg')
     await context.channel.send(file=discord.File('forthegloryofsatan.jpg'))
+
+@bot.command(name='navyseal')
+async def fortheglory(context):
+    ##glory = Image.open('forthegloryofsatan.jpg')
+    await context.channel.send(file=discord.File('navyseal.gif'))
     
 
 @bot.command(name='hold')
@@ -687,8 +692,30 @@ async def intensifytext(context, *, message):
     except:
         red, blue, green = 255,0,0
     endcut = len(message)-len(str(intensity))-3-len(str(red))-len(str(blue))-len(str(green))
-    text = message[0:endcut]
+    text = message[0:endcut].replace("\"","\\\"")
     os.system('python3 mstest.py '+str(channel)+' "'+str(text)+'" intense '+str(red)+' '+str(blue)+' '+str(green)+' '+str(intensity))
+
+@bot.command(name='speed')
+async def speedtext(context, *, message):
+    channel = context.message.channel.id
+    args = list(message.split(" "))
+    try:
+        intensity = int(args[-1])
+    except:
+        intensity = 1
+    try:
+        red, blue, green = int(args[-4]),int(args[-3]),int(args[-2])
+    except:
+        red, blue, green = 255,0,0
+    endcut = len(message)-len(str(intensity))-3-len(str(red))-len(str(blue))-len(str(green))
+    text = message[0:endcut].replace("\"","\\\"")
+    os.system('python3 mstest.py '+str(channel)+' "'+str(text)+'" speed '+str(red)+' '+str(blue)+' '+str(green)+' '+str(intensity))
+
+@bot.command(name='mocking')
+async def speedtext(context, *, message):
+    channel = context.message.channel.id
+    text = message.replace("\"","\\\"")
+    os.system('python3 mstest.py '+str(channel)+' "'+str(text)+'" mocking')
 
 @bot.command(name='space')
 async def spacey(context, emojiStr):

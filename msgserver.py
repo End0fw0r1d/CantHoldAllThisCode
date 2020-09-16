@@ -37,7 +37,10 @@ async def on_ready():
             chId, msgTxt = messageQueue.pop(0)
             channel = bot.get_channel(int(chId))
             if msgTxt[-4:] in acceptedEnds:
-                await channel.send(file=discord.File(msgTxt))
+                try:
+                    await channel.send(file=discord.File(msgTxt))
+                except:
+                    await channel.send("resultant file too large...")
                 os.remove(msgTxt)
             else:
                 await channel.send(str(msgTxt))

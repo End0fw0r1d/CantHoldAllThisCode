@@ -2,15 +2,41 @@ from PIL import Image, ImageFilter, GifImagePlugin, ImageFont, ImageSequence, Im
 import os, glob, time, asyncio
 import math, random
 
+
 def intensifytext(inputText, intensity, red, blue, green, emojiId):
-    canv = Image.open('canvas.png').resize((800,100))
-    d1 = ImageDraw.Draw(canv)
     myFont = ImageFont.truetype('font/whitney-semibold.otf',30)
-    d1.text((0,0),inputText, font=myFont, fill=(red,blue,green), align='center')
-    xd, yd = myFont.getsize(inputText)
+    marker = 0
+    if inputText == "BeeMovie ":
+        myFont = ImageFont.truetype('font/whitney-semibold.otf',7)
+        print("opening file")
+        text_file = open("movieScript.txt","r")
+        text_info = text_file.read()
+        print(len(text_info))
+        text_file.close()
+        inputText = text_info
+    #loopT = round(len(inputText)/100)+8
+    while True:
+        print('loop...')
+        if (marker+100) > len(inputText):
+            print("broke at ",marker)
+            break
+        beginning = marker+100
+        marker = inputText.rfind(" ", 0, beginning)
+        if marker == -1:
+            marker = 100
+        print(marker)
+        inputText = inputText[:marker]+' \n'+inputText[marker:]
+        #print(inputText)
+    canv = Image.open('canvas.png').resize((1400,7000))
+    d1 = ImageDraw.Draw(canv)
+    d1.multiline_text((0,0),inputText, font=myFont, fill=(red,blue,green), align='center', spacing=1)
+    xd, yd = d1.multiline_textsize(inputText, font=myFont, spacing=1)
+    if yd > 7000:
+        yd = 7000
+    ##xd, yd = myFont.getsize(inputText)
     canv = canv.crop((0,0,xd,yd))
     images = []
-    frames = 24-1
+    frames = 12-1
     frequency = 4
     frequency2 = 3
     canvas = Image.open('canvas.png').resize((xd+50,yd+50))

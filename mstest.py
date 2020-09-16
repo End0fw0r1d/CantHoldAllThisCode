@@ -12,6 +12,8 @@ from space import processSpaceGif, processSpaceImage
 from monkaShoot import processShootImage
 from intense import intensifytext
 from DickMan import processManImage, processManGif
+from speed import speedtext
+from mockingSpongebob import mockingSpongebob
 import slots
 import adventuring
 
@@ -56,8 +58,11 @@ if args[3] == 'buildstart':
 if args[3] == 'simtest':
     imageFilename = adventuring.simTime(str(args[2]))
 if args[3] == 'intense':
-    print(args)
     imageFilename = intensifytext(str(args[2]),int(args[-1]),int(args[-4]),int(args[-3]),int(args[-2]),randId)
+if args[3] == 'speed':
+    imageFilename = speedtext(str(args[2]),int(args[-1]),int(args[-4]),int(args[-3]),int(args[-2]),randId)
+if args[3] == 'mocking':
+    imageFilename = mockingSpongebob(str(args[2]),randId)
 if args[3] == 'shook':
     if gif == False:
         imageFilename = processShookImage(emojiImage,randId)
