@@ -5,11 +5,9 @@ Currently the bot relies on manually starting up cantholdthis.py (which listens 
 
 Commands are recognized by cantholdthis.py, then handed off to processmanager.py which handles image operations on parallel processes via multiprocessing, and hands the results off to msgserver.py, which uploads to discord.
 
-Image edits are loaded as libraries in processmanager.py and handled based on the arguments passed through, returning a resultant image file) using multiprocessing.connection ports to send off the image filename or text string to the msgserver (which is listening always).
+Image edits are loaded as libraries in processmanager.py and handled based on the arguments passed through, returning a resultant image file, using multiprocessing.connection ports to send off the image filename or text string to the msgserver (which is listening always).
 
-Msgserver.py adds it to a queue list of messages to send to the discord channel that the originating command came from (passed as command-line arg to mstest.py, then along with the payload to the msgserver.py).
-
-Msgserver.py async loops, with a small sleep, and if the list of messages to process is greater than 0, uploads the file with the inserted filename if the message is a file, then deletes the server-side file, else the message is text and it just uploads the text.
+Msgserver.py and processmanager.py use lists to queue up relevant tasks for processing through/from listening or sending ports.
 
 Additionally, I have reacting.py, but that's because for whatever reason, I can't have the bot listening to messages and commands in the same file, so I just have a small separate file for listening to messages and responding if/when appropriate.
 
