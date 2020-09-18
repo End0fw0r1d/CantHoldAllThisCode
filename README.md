@@ -16,7 +16,7 @@ Additionally, I have reacting.py, but that's because for whatever reason, I can'
 it's a learning project kinda, but also as a long-term project of someone with a short attention span sometimes, there's some unnecessary redundancy in places, and a lot of improvements and changes to be made.
 After I haven't touched it for a while, I often have to go back and reread old bits of code to remember how I did things and why.
 
-It's fairly easy to set up, you just need to roll your own .env file with appropriate credentials in it(which involves making your own bot in discord dev portal to get a token from them) and optionally, if you want gfycat uploads to work for the 2? commands that use it, a gfycat username/password and client ID+secret(albeit, gfycat uploads needs to be changed to a different solution sometime as it apparently doesn't quite work as gfycat was a solution early in the project for gif files too large for discord).
+It's fairly easy to set up, you just need to roll your own .env file with appropriate credentials in it(which involves making your own bot in discord dev portal to get a token from them)
 
 I can't off the top of my head name all the python libraries besides PIL that you need, but just install anything python tells you it can't import because it doesn't exist.
 
