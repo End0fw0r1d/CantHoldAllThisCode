@@ -2,7 +2,7 @@ from PIL import Image, ImageFilter, GifImagePlugin, ImageSequence, ImageChops, I
 import os, glob, time, asyncio
 import math, random
 
-def JpegImage2(emoPng,emojiId,times):
+def JpegImage2(emoPng,times,emojiId):
     print('image')
     image_width, image_height = emoPng.size
     emoPng = emoPng.convert('YCbCr')
@@ -26,7 +26,7 @@ def JpegImage2(emoPng,emojiId,times):
         emoPng.save(str(emojiId)+'Jpegged.jpg', quality=0)
     return (str(emojiId)+'Jpegged.jpg')
 
-def JpegGif2(emoGif,emojiId,times):
+def JpegGif2(emoGif,times,emojiId):
     images = []
     totalFrames = emoGif.n_frames
     gifDuration = emoGif.info['duration']

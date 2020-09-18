@@ -53,7 +53,7 @@ def getID(Input):
         idString = Input[Input.rfind(':')+1:-1]
     except:
         idString = Input
-    return(idString)
+    return(idString.replace("\"","").replace("$","").replace("`",""))
 
 def exists(path):
     r = requests.head(path)
@@ -679,149 +679,149 @@ async def crazyshooking(context, emojiStr):
     else:
         await context.channel.send('Gif emoji not supported at this time. :-(')
 
-@bot.command(name='intense')
-async def intensifytext(context, *, message):
-    channel = context.message.channel.id
-    args = list(message.split(" "))
-    try:
-        intensity = int(args[-1])
-    except:
-        intensity = 1
-    try:
-        red, blue, green = int(args[-4]),int(args[-3]),int(args[-2])
-    except:
-        red, blue, green = 255,0,0
-    endcut = len(message)-len(str(intensity))-3-len(str(red))-len(str(blue))-len(str(green))
-    text = message[0:endcut].replace("\"","\\\"")
-    os.system('python3 mstest.py '+str(channel)+' "'+str(text)+'" intense '+str(red)+' '+str(blue)+' '+str(green)+' '+str(intensity))
-
-@bot.command(name='speed')
-async def speedtext(context, *, message):
-    channel = context.message.channel.id
-    args = list(message.split(" "))
-    try:
-        intensity = int(args[-1])
-    except:
-        intensity = 1
-    try:
-        red, blue, green = int(args[-4]),int(args[-3]),int(args[-2])
-    except:
-        red, blue, green = 255,0,0
-    endcut = len(message)-len(str(intensity))-3-len(str(red))-len(str(blue))-len(str(green))
-    text = message[0:endcut].replace("\"","\\\"")
-    os.system('python3 mstest.py '+str(channel)+' "'+str(text)+'" speed '+str(red)+' '+str(blue)+' '+str(green)+' '+str(intensity))
-
-@bot.command(name='mocking')
-async def speedtext(context, *, message):
-    channel = context.message.channel.id
-    text = message.replace("\"","\\\"")
-    os.system('python3 mstest.py '+str(channel)+' "'+str(text)+'" mocking')
-
-@bot.command(name='space')
-async def spacey(context, emojiStr):
-    idString = getID(emojiStr)
-    channel = context.message.channel.id
-    #output needs to be 3 args: channel, image id string, and command used
-    os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' space')
-
-@bot.command(name='shoot')
-async def spacey(context, emojiStr):
-    idString = getID(emojiStr)
-    channel = context.message.channel.id
-    #output needs to be 3 args: channel, image id string, and command used
-    os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' shoot')
-
-@bot.command(name='italics') #DONE
-async def italicize(context, emojiStr):
-    idString = getID(emojiStr)
-    channel = context.message.channel.id
-    #output needs to be 3 args: channel, image id string, and command used
-    os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' italics')
-
-@bot.command(name='jpeg') #DONE
-async def Jpegify(context, emojiStr):
-    idString = getID(emojiStr)
-    channel = context.message.channel.id
-    os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' jpeg')
-
-@bot.command(name='man') #DONE
-async def DickMan(context, emojiStr):
-    idString = getID(emojiStr)
-    channel = context.message.channel.id
-    os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' man')
-
-@bot.command(name='jpeg2') #DONE
-async def Jpegify2(context, *, message):
-    if message != None:
-        args = list(message.split(" "))
-    validLen = False
-    if len(args) == 1 or len(args) == 2:
-        validLen = True
-    emojiStr = args[0]
-    idString = getID(emojiStr)
-    if validLen:
-        try:
-            args[1] = int(args[1])
-            if int(args[1]) > 20:
-                args[1] = 20
-                await context.channel.send('Capped at 20')
-            times = args[1]
-            channel = context.message.channel.id
-            os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' jpeg2 '+str(times))
-        except:
-            await context.channel.send('Entry in [1] not an int')
-    else:
-        await context.channel.send('Invalid Number of Args')
-
-@bot.command(name='jpeg3') #DONE
-async def Jpegify3(context, *, message):
-    print(message)
-    if message != None:
-        args = list(message.split(" "))
-    validLen = False
-    if len(args) == 1 or len(args) == 2:
-        validLen = True
-    emojiStr = args[0]
-    idString = getID(emojiStr)
-    url = "https://cdn.discordapp.com/emojis/"+idString
-    if validLen:
-        try:
-            args[1] = int(args[1])
-            if int(args[1]) > 20:
-                args[1] = 20
-                await context.channel.send('Capped at 20')
-            gifProcess = exists(url+".gif")
-            times = args[1]
-            channel = context.message.channel.id
-            os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' jpeg3 '+str(times))
-        except:
-            await context.channel.send('Entry in [1] not an int')
-    else:
-        await context.channel.send('Invalid Number of Args')
-    
-@bot.command(name='boys')
-async def boysOnline(context):
-    try:
-        server = MinecraftServer.lookup(minecraftIP)
-        status = server.status()
-        await context.channel.send("There are {0} boys online, query took {1} ms".format(status.players.online, status.latency))
-        if status.players.online > 0:
-            query = server.query()
-            await context.channel.send("The following boys are online: {0}".format(", ".join(query.players.names)))
-    except:
-        await context.channel.send("Error")
-
-@bot.command(name='listboys')
-async def boysList(context):
-    server = MinecraftServer.lookup(minecraftIP)
-    query = server.query()
-    await context.channel.send("The following boys are online: {0}".format(", ".join(query.players.names)))
-
-@bot.command(name='conch')
-async def magicConch(context):
-    conchAnswers = ['As I see it, yes.','Ask again later.','Better not tell you now.','Cannot predict now.','Concentrate and ask again.','Don\'t count on it.','It is certain.','It is decidedly so.','Most likely.','My reply is no.','My sources say no.','Outlook not so good.','Outlook good.','Reply hazy, try again.','Signs point to yes.','Very doubtful.','Without a doubt.','Yes.','Yes - definitely.','You may rely on it.']
-    answer = random.randint(0,19)
-    await context.channel.send(":shell:"+conchAnswers[answer])
+# @bot.command(name='intense')
+# async def intensifytext(context, *, message):
+#     channel = context.message.channel.id
+#     args = list(message.split(" "))
+#     try:
+#         intensity = int(args[-1])
+#     except:
+#         intensity = 1
+#     try:
+#         red, blue, green = int(args[-4]),int(args[-3]),int(args[-2])
+#     except:
+#         red, blue, green = 255,0,0
+#     endcut = len(message)-len(str(intensity))-3-len(str(red))-len(str(blue))-len(str(green))
+#     text = message[0:endcut].replace("\"","\\\"").replace("$","\$").replace("`","")
+#     os.system('python3 mstest.py '+str(channel)+' "'+str(text)+'" intense '+str(red)+' '+str(blue)+' '+str(green)+' '+str(intensity))
+#
+# @bot.command(name='speed')
+# async def speedtext(context, *, message):
+#     channel = context.message.channel.id
+#     args = list(message.split(" "))
+#     try:
+#         intensity = int(args[-1])
+#     except:
+#         intensity = 1
+#     try:
+#         red, blue, green = int(args[-4]),int(args[-3]),int(args[-2])
+#     except:
+#         red, blue, green = 255,0,0
+#     endcut = len(message)-len(str(intensity))-3-len(str(red))-len(str(blue))-len(str(green))
+#     text = message[0:endcut].replace("\"","\\\"").replace("$","\$").replace("`","")
+#     os.system('python3 mstest.py '+str(channel)+' "'+str(text)+'" speed '+str(red)+' '+str(blue)+' '+str(green)+' '+str(intensity))
+#
+# @bot.command(name='mocking')
+# async def speedtext(context, *, message):
+#     channel = context.message.channel.id
+#     text = message.replace("\"","\\\"").replace("$","\$").replace("`","")
+#     os.system('python3 mstest.py '+str(channel)+' "'+str(text)+'" mocking')
+#
+# @bot.command(name='space')
+# async def spacey(context, emojiStr):
+#     idString = getID(emojiStr)
+#     channel = context.message.channel.id
+#     #output needs to be 3 args: channel, image id string, and command used
+#     os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' space')
+#
+# @bot.command(name='shoot')
+# async def spacey(context, emojiStr):
+#     idString = getID(emojiStr)
+#     channel = context.message.channel.id
+#     #output needs to be 3 args: channel, image id string, and command used
+#     os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' shoot')
+#
+# @bot.command(name='italics') #DONE
+# async def italicize(context, emojiStr):
+#     idString = getID(emojiStr)
+#     channel = context.message.channel.id
+#     #output needs to be 3 args: channel, image id string, and command used
+#     os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' italics')
+#
+# @bot.command(name='jpeg') #DONE
+# async def Jpegify(context, emojiStr):
+#     idString = getID(emojiStr)
+#     channel = context.message.channel.id
+#     os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' jpeg')
+#
+# @bot.command(name='man') #DONE
+# async def DickMan(context, emojiStr):
+#     idString = getID(emojiStr)
+#     channel = context.message.channel.id
+#     os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' man')
+#
+# @bot.command(name='jpeg2') #DONE
+# async def Jpegify2(context, *, message):
+#     if message != None:
+#         args = list(message.split(" "))
+#     validLen = False
+#     if len(args) == 1 or len(args) == 2:
+#         validLen = True
+#     emojiStr = args[0]
+#     idString = getID(emojiStr)
+#     if validLen:
+#         try:
+#             args[1] = int(args[1])
+#             if int(args[1]) > 20:
+#                 args[1] = 20
+#                 await context.channel.send('Capped at 20')
+#             times = args[1]
+#             channel = context.message.channel.id
+#             os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' jpeg2 '+str(times))
+#         except:
+#             await context.channel.send('Entry in [1] not an int')
+#     else:
+#         await context.channel.send('Invalid Number of Args')
+#
+# @bot.command(name='jpeg3') #DONE
+# async def Jpegify3(context, *, message):
+#     print(message)
+#     if message != None:
+#         args = list(message.split(" "))
+#     validLen = False
+#     if len(args) == 1 or len(args) == 2:
+#         validLen = True
+#     emojiStr = args[0]
+#     idString = getID(emojiStr)
+#     url = "https://cdn.discordapp.com/emojis/"+idString
+#     if validLen:
+#         try:
+#             args[1] = int(args[1])
+#             if int(args[1]) > 20:
+#                 args[1] = 20
+#                 await context.channel.send('Capped at 20')
+#             gifProcess = exists(url+".gif")
+#             times = args[1]
+#             channel = context.message.channel.id
+#             os.system('python3 mstest.py '+str(channel)+' '+str(idString)+' jpeg3 '+str(times))
+#         except:
+#             await context.channel.send('Entry in [1] not an int')
+#     else:
+#         await context.channel.send('Invalid Number of Args')
+#
+# @bot.command(name='boys')
+# async def boysOnline(context):
+#     try:
+#         server = MinecraftServer.lookup(minecraftIP)
+#         status = server.status()
+#         await context.channel.send("There are {0} boys online, query took {1} ms".format(status.players.online, status.latency))
+#         if status.players.online > 0:
+#             query = server.query()
+#             await context.channel.send("The following boys are online: {0}".format(", ".join(query.players.names)))
+#     except:
+#         await context.channel.send("Error")
+#
+# @bot.command(name='listboys')
+# async def boysList(context):
+#     server = MinecraftServer.lookup(minecraftIP)
+#     query = server.query()
+#     await context.channel.send("The following boys are online: {0}".format(", ".join(query.players.names)))
+#
+# @bot.command(name='conch')
+# async def magicConch(context):
+#     conchAnswers = ['As I see it, yes.','Ask again later.','Better not tell you now.','Cannot predict now.','Concentrate and ask again.','Don\'t count on it.','It is certain.','It is decidedly so.','Most likely.','My reply is no.','My sources say no.','Outlook not so good.','Outlook good.','Reply hazy, try again.','Signs point to yes.','Very doubtful.','Without a doubt.','Yes.','Yes - definitely.','You may rely on it.']
+#     answer = random.randint(0,19)
+#     await context.channel.send(":shell:"+conchAnswers[answer])
     
 @bot.command(name='bank')
 async def slotMachine(context):

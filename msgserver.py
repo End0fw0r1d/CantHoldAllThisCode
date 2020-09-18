@@ -13,8 +13,11 @@ messageQueue = []
 
 # client
 def child(conn):
-    msg = conn.recv()
-    messageQueue.append([msg[0],msg[1]])
+    try:
+        msg = conn.recv()
+        messageQueue.append([msg[0],msg[1]])
+    except:
+        print("reception error")
     print(len(messageQueue))
 
 # server

@@ -2,7 +2,7 @@ import sys, requests, io, math, random
 from PIL import Image
 from io import BytesIO
 from multiprocessing.connection import Client
-from ShookImage import processShookImage
+#from ShookImage import processShookImage
 from italicize import italicizePng, italicizeGif
 from jpegify import JpegImage, JpegGif
 from jpegify2 import JpegImage2, JpegGif2

@@ -3,7 +3,7 @@ import os, glob, time, asyncio
 import math, random
 
 
-def notBttv(emoPng, emojiId, arg, ex, ey, roty, scale):
+def notBttv(emoPng, arg, ex, ey, roty, scale, emojiId):
     maskedArgs = ['hazmat','hazmatf']
     emoPng = emoPng.convert('RGBA')
     overlay = Image.open(arg+'.png').convert('RGBA')
