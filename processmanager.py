@@ -3,6 +3,7 @@ import json
 import random
 import threading
 import time
+import multiprocessing
 from multiprocessing.connection import Client
 from multiprocessing.connection import Listener
 
@@ -38,14 +39,14 @@ def listening():
         time.sleep(0.1)
 
 
-def awaiting():
-    while True:
-        if len(outputQueue) > 0:
-            print(outputQueue)
-            client = Client(('localhost', 5000))
-            payload = outputQueue.pop()  # payload is [0] == channel id, [1] == message/filename
-            client.send(payload)
-        time.sleep(0.1)
+# def awaiting():
+#     while True:
+#         if len(outputQueue) > 0:
+#             print(outputQueue)
+#             client = Client(('localhost', 5000))
+#             payload = outputQueue.pop()  # payload is [0] == channel id, [1] == message/filename
+#             client.send(payload)
+#         time.sleep(0.1)
 
 
 def grabImage(urll):  # if you direct link to a png/gif/etc, it will directly return it as a bytestream of the image
@@ -275,18 +276,22 @@ def imageProcessing(command, userinput, channel_id):
                     output = "Gifs not supported"
     except:
         output = "Error"
-    outputQueue.append([channel_id, output])  # payload is [0] == channel id, [1] == message/filename
+    client = Client(('localhost', 5000))
+    payload = [channel_id, output]  # payload is [0] == channel id, [1] == message/filename
+    client.send(payload)
+    # outputQueue.append([channel_id, output])  # payload is [0] == channel id, [1] == message/filename
 
 
 if __name__ == '__main__':
     thr = threading.Thread(target=listening)
     thr.start()
-    thr2 = threading.Thread(target=awaiting)
-    thr2.start()
+    # thr2 = threading.Thread(target=awaiting)
+    # thr2.start()
     while True:
         while len(jobQueue) > 0:
             job = jobQueue.pop(0)  # job is dict channel/command/message
             print(job)
-            # p = multiprocessing.Process(target=imageProcessing, args=(job["command"], job["userinput"], job["channel"]))
-            imageProcessing(job["command"], job["userinput"], job["channel"])
+            p = multiprocessing.Process(target=imageProcessing, args=(job["command"], job["userinput"], job["channel"]))
+            p.start()
+            # imageProcessing(job["command"], job["userinput"], job["channel"])
         time.sleep(0.1)
