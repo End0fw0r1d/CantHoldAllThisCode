@@ -1,26 +1,26 @@
+import io
 import json
 import random
 import threading
 import time
-import io
 from multiprocessing.connection import Client
 from multiprocessing.connection import Listener
-from PIL import Image
 
 import requests
+from PIL import Image
 
+from DickMan import processManImage, processManGif
 from intense import intensifytext
-from speed import speedtext
-from mockingSpongebob import mockingSpongebob
-from space import processSpaceGif, processSpaceImage
-from monkaShoot import processShootImage
 from italicize import italicizePng, italicizeGif
 from jpegify import JpegImage, JpegGif
-from DickMan import processManImage, processManGif
 from jpegify2 import JpegGif2, JpegImage2
 from jpegify3 import JpegGif3, JpegImage3
-from shook import processMoreShookImage, processNukeImage, processCrazyShookImage, processShookImage, processGifImage, processStaticImage
+from mockingSpongebob import mockingSpongebob
+from monkaShoot import processShootImage
 from notbttv import notBttv
+from shook import processMoreShookImage, processNukeImage, processCrazyShookImage, processShookImage, processGifImage, processStaticImage
+from space import processSpaceGif, processSpaceImage
+from speed import speedtext
 
 jobQueue = []
 outputQueue = []

@@ -122,7 +122,7 @@ bot.remove_command('help')
 
 @bot.command(name='help')
 async def helping(ctx):
-    response = "intense, " + ", ".join(commandList) + ", ".join(miscCommands)
+    response = "intense, " + ", ".join(commandList) + ", " + ", ".join(miscCommands)
     client = Client(('localhost', 5000))
     payload = [ctx.message.channel.id, response]  # payload is [0] == channel id, [1] == message/filename
     client.send(payload)
