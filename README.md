@@ -1,9 +1,11 @@
 # CantHoldAllThisCode
 A discord bot, using Python to automate meme creation
 
-Currently the bot relies on manually starting up cantholdallthese.py (which listens to and handles command inputs) and msgserver.py, and for the commands I have it set up for, fires off a mstest.py with command-line arguments(easy multithreading, safety from crashes in the image-processing stage shutting the bot down).
+Currently the bot relies on manually starting up cantholdthis.py (which listens to and handles command inputs), processmanager.py, and msgserver.py
 
-Image edits are loaded as libraries in mstest.py and handled based on the arguments passed through, returning a resultant image file) using multiprocessing.connection ports to send off the image filename or text string to the msgserver (which is listening always).
+Commands are recognized by cantholdthis.py, then handed off to processmanager.py which handles image operations on parallel processes via multiprocessing, and hands the results off to msgserver.py, which uploads to discord.
+
+Image edits are loaded as libraries in processmanager.py and handled based on the arguments passed through, returning a resultant image file) using multiprocessing.connection ports to send off the image filename or text string to the msgserver (which is listening always).
 
 Msgserver.py adds it to a queue list of messages to send to the discord channel that the originating command came from (passed as command-line arg to mstest.py, then along with the payload to the msgserver.py).
 
@@ -22,7 +24,3 @@ I can't off the top of my head name all the python libraries besides PIL that yo
 
 DISCORD_TOKEN=
 DISCORD_GUILD=
-GFYCAT_CLIENT_ID=
-GFYCAT_CLIENT_SECRET=
-GFYCAT_USERNAME=
-GFYCAT_PASSWORD=
