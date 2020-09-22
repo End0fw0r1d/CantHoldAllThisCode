@@ -5,13 +5,14 @@ import math, random
 def processSpaceImage(emoPng,emojiId):
     images = []
     frames = 960-1
-    img2 = Image.open('canvas.png')
+    img2 = Image.open('canvas.png').copy()
+    # img2 = Image.new(mode="RGBA", size=(400, 400), color=(0, 0, 0, 0))
     frequency = 3
     frequency2 = 6
     xStart = []
     yStart = []
     dist = 100
-    emoPng = emoPng.convert('RGBA')
+    emoPng = emoPng.copy().convert('RGBA')
     for i in range(0, 4, 1):
         rotations = random.randint(0,360)*(math.pi/180)
         xStart.append(round(math.sin(rotations)*dist))
@@ -40,7 +41,7 @@ def processSpaceImage(emoPng,emojiId):
             X = 0
             Y = 0
             rotMul = 3
-        canvas = img2.copy()
+        canvas = Image.new(mode="RGBA", size=(400, 400), color=(0, 0, 0, 0))
         ratio = emoPng.height/emoPng.width
         if emoPng.width > 60:
             image = emoPng.copy().resize((60,round(60*ratio)), Image.BICUBIC)
@@ -68,7 +69,7 @@ def processSpaceImage(emoPng,emojiId):
         mask = Image.eval(alpha, lambda a: 255 if a <=128 else 0)
         croppedImage.paste(255, mask)
         images.append(croppedImage)
-    images[0].save(emojiId+'space.gif', save_all=True, append_images=images[1:], duration=20, loop=0, optimize=False, transparency=255, disposal=2)
+    images[0].save(str(emojiId)+'space.gif', save_all=True, append_images=images[1:], duration=20, loop=0, optimize=False, transparency=255, disposal=2)
     return (str(emojiId)+'space.gif')
 
 def processSpaceGif(emoGif,emojiId):
@@ -121,7 +122,7 @@ def processSpaceGif(emoGif,emojiId):
             X = 0
             Y = 0
             rotMul = 3
-        canvas = img2.copy()
+        canvas = Image.new(mode="RGBA", size=(400, 400), color=(0, 0, 0, 0))
         ratio = emoPng.height/emoPng.width
         if emoPng.width > 60:
             image = emoPng.copy().resize((60,round(60*ratio)), Image.BICUBIC)
@@ -149,5 +150,5 @@ def processSpaceGif(emoGif,emojiId):
         mask = Image.eval(alpha, lambda a: 255 if a <=128 else 0)
         croppedImage.paste(255, mask)
         images.append(croppedImage)
-    images[0].save(emojiId+'space.gif', save_all=True, append_images=images[1:], duration=20, loop=0, optimize=False, transparency=255, disposal=2)
+    images[0].save(str(emojiId)+'space.gif', save_all=True, append_images=images[1:], duration=20, loop=0, optimize=False, transparency=255, disposal=2, include_color_table=True)
     return (str(emojiId)+'space.gif')

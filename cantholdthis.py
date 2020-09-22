@@ -13,7 +13,7 @@ from mcstatus import MinecraftServer
 minecraftIP = 'minecraft.hackervoiceim.in:25565'
 
 commandList = ["speed", "mocking", "space", "shoot", "italics", "jpeg", "man", "jpeg2", "jpeg3", "weee", "shake", "nuke", "moreshake", "hold", "hold2",
-               "overlay", "overlay2"]
+               "overlay", "overlay2", "4head", "wormhole"]
 # the above is kinda hacky, but I want to process all valid commands the same way, so just put any valid/currently used commands here...
 # if we want to dynamically update this for added features without restarting the bot, maybe move this to a text file or something, and re-read it on a command input
 

@@ -3,7 +3,7 @@ import os, glob, time, asyncio
 import math, random
 
 
-def speedtext(inputText, intensity, red, blue, green, emojiId):
+def speedtext(inputText, red, green, blue, intensity, emojiId):
     intensity = round(intensity) * 10
     if intensity < 20:
         intensity = 20
@@ -22,7 +22,7 @@ def speedtext(inputText, intensity, red, blue, green, emojiId):
         canvas2 = canvas.copy()
         canv = Image.open('canvas.png').resize((xd, yd))
         d1 = ImageDraw.Draw(canv)
-        d1.multiline_text((0, 0), listy[i], font=myFont, fill=(red, blue, green), align='center', spacing=1)
+        d1.multiline_text((0, 0), listy[i], font=myFont, fill=(red, green, blue), align='center', spacing=1)
         xd2, yd2 = myFont.getsize(listy[i])
         offset = round((xd - xd2) / 2)
         canvas2.paste(canv, (offset, 0))

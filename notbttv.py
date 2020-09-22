@@ -2,6 +2,8 @@ from PIL import Image, ImageFilter, GifImagePlugin, ImageSequence, ImageChops, I
 import os, glob, time, asyncio
 import math, random
 
+def notBttvDef(emoPng, arg, emojiId):
+    return notBttv(emoPng, arg, 0, 0, 0, 1, emojiId)
 
 def notBttv(emoPng, arg, ex, ey, roty, scale, emojiId):
     maskedArgs = ['hazmat','hazmatf']

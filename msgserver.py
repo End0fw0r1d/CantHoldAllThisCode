@@ -45,14 +45,18 @@ async def on_ready():
         if len(messageQueue) > 0:
             chId, msgTxt = messageQueue.pop(0)
             channel = bot.get_channel(int(chId))
-            if msgTxt[-4:] in acceptedEnds:
-                try:
-                    await channel.send(file=discord.File(msgTxt))
-                except:
-                    await channel.send("resultant file too large...")
-                os.remove(msgTxt)
-            else:
-                await channel.send(str(msgTxt))
+            print(msgTxt)
+            try:
+                if msgTxt[-4:] in acceptedEnds:
+                    try:
+                        await channel.send(file=discord.File(msgTxt))
+                    except:
+                        await channel.send("resultant file too large...")
+                    os.remove(msgTxt)
+                else:
+                    await channel.send(str(msgTxt))
+            except:
+                await channel.send("Error")
         await asyncio.sleep(0.05)
     # await mother(('', 5000))
 

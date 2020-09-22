@@ -1,9 +1,10 @@
 import io
 import json
+import multiprocessing
 import random
 import threading
 import time
-import multiprocessing
+import os.path
 from multiprocessing.connection import Client
 from multiprocessing.connection import Listener
 
@@ -18,13 +19,25 @@ from jpegify2 import JpegGif2, JpegImage2
 from jpegify3 import JpegGif3, JpegImage3
 from mockingSpongebob import mockingSpongebob
 from monkaShoot import processShootImage
-from notbttv import notBttv
-from shook import processMoreShookImage, processNukeImage, processCrazyShookImage, processShookImage, processGifImage, processStaticImage
+from notbttv import notBttv, notBttvDef
+from pptasty import process4headImage, process4headGif, processwormholeImage, processwormholeGif
+from shook import processMoreShookImage, processNukeImage, processCrazyShookImage, processShookImage, processGifImageT, processGifImageF, processStaticImage, \
+    processNukeGif
 from space import processSpaceGif, processSpaceImage
 from speed import speedtext
 
 jobQueue = []
 outputQueue = []
+imageArgs = {"intense": ["text", "int", "int", "int", "int"], "speed": ["text", "int", "int", "int", "int"], "mocking": ["text"], "space": ["image"],
+             "shoot": ["image"], "italics": ["image"], "jpeg": ["image"], "man": ["image"], "jpeg2": ["image", "int"], "jpeg3": ["image", "int"],
+             "weee": ["image"], "shake": ["image"], "nuke": ["image"], "moreshake": ["image"], "hold": ["image"], "hold2": ["image"],
+             "overlay2": ["image", "string", "int", "int", "int", "int"], "overlay": ["image", "string"], "4head": ["image", "int"], "wormhole": ["image"]}
+imageFunc = {"intense": [intensifytext], "speed": [speedtext], "mocking": [mockingSpongebob], "space": [processSpaceImage, processSpaceGif],
+             "shoot": [processShootImage], "italics": [italicizePng, italicizeGif], "jpeg": [JpegImage, JpegGif], "man": [processManImage, processManGif],
+             "jpeg2": [JpegImage2, JpegGif2], "jpeg3": [JpegImage3, JpegGif3], "weee": [processCrazyShookImage], "shake": [processShookImage],
+             "nuke": [processNukeImage, processNukeGif], "moreshake": [processMoreShookImage], "hold": [processStaticImage, processGifImageF],
+             "hold2": [processStaticImage, processGifImageT], "overlay2": [notBttvDef], "overlay": [notBttv], "4head": [process4headImage, process4headGif],
+             "wormhole": [processwormholeImage, processwormholeGif]}
 
 
 def listening():
@@ -57,6 +70,7 @@ def grabImage(urll):  # if you direct link to a png/gif/etc, it will directly re
 
 def getID(emoji_string):
     idString = emoji_string[emoji_string.rfind(':') + 1:-1]
+    print(idString)
     return (idString)
 
 
@@ -65,222 +79,81 @@ def exists(path):  # checks if url exists
     return r.status_code == requests.codes.ok
 
 
-def deconstruct(input, varlist):
+def deconstruct(inlist, varlist):
     outlist = []
-    inlist = input.split(" ")
-    print(inlist)
-    if len(varlist) > len(inlist):
-        return False
+    arglist = []
+    gif = False
+    for i in inlist:    # removes all empty list positions
+        if i == "" or i == " ":
+            inlist.remove(i)
+    for i in range(len(varlist)-1,0,-1):
+        arglist.insert(0,inlist.pop())
+    if inlist != []:
+        if inlist[0] in imageArgs:
+            varg = inlist.pop(0)
+            arglist.insert(0, imageProcessing(varg," ".join(inlist)))
+        else:
+            if varlist[0] != "text":
+                arglist.insert(0, inlist.pop(0))
+            else:
+                arglist.insert(0, " ".join(inlist))
     for i in reversed(varlist):
-        while inlist[-1] == "" or inlist[-1] == " ":
-            inlist.pop()
         if i == "int":
-            outlist.append(int(inlist.pop()))
+            outlist.append(int(arglist.pop()))
         if i == "text":
-            outlist.append(" ".join(inlist))
+            outlist.append(" ".join(arglist))
         if i == "string":
-            outlist.append(str(inlist.pop()))
+            outlist.append(str(arglist.pop()))
         if i == "image":
-            try:
-                idstring = int(getID(inlist.pop()))
-                url = "https://cdn.discordapp.com/emojis/" + str(idstring)
-                gif = exists(url + ".gif")
-                image = Image.open(grabImage(url))
-                outlist.append([image, gif])
-            except:
-                return False
+            if os.path.isfile(arglist[-1]):
+                if str(arglist[-1])[-3:] == "gif":
+                    gif = True
+                filename = str(arglist[-1])
+                image = Image.open(filename)
+                outlist.append(image)
+                os.remove(arglist.pop())
+            else:
+                try:
+                    idstring = int(getID(arglist.pop()))
+                    url = "https://cdn.discordapp.com/emojis/" + str(idstring)
+                    gif = exists(url + ".gif")
+                    image = Image.open(grabImage(url))
+                    outlist.append(image)
+                except:
+                    return False
     outlist.reverse()
     print(outlist)
-    return outlist
+    return outlist, gif
 
 
-def imageProcessing(command, userinput, channel_id):
+def imageProcessing(command, userinput):
     randid = str(random.randint(0, 99999) + 1)
     output = "Error"
     try:
-        if command == "intense":
-            print("intense")
-            args = deconstruct(userinput, ["text", "int", "int", "int", "int"])
-            if not args:
-                print("not args")
-                output = "Error"
-            else:
-                a, r, g, b, e = args
-                output = intensifytext(a, e, r, g, b, randid)
-        if command == "speed":
-            args = deconstruct(userinput, ["text", "int", "int", "int", "int"])
+        if command in imageArgs:
+            args, gswitch = deconstruct(userinput.split(" "), imageArgs[command])
             if not args:
                 output = "Error"
             else:
-                a, r, g, b, e = args
-                output = speedtext(a, e, r, g, b, randid)
-        if command == "mocking":
-            args = deconstruct(userinput, ["text"])
-            if not args:
-                output = "Error"
-            else:
-                a = args[0]
-                output = mockingSpongebob(a, randid)
-        if command == "space":
-            args = deconstruct(userinput, ["image"])
-            if not args:
-                output = "Error"
-            else:
-                a = args[0]
-                if not a[1]:
-                    output = processSpaceImage(a[0], randid)
+                args.append(randid)
+                if not gswitch:
+                    output = imageFunc[command][0](*args)
                 else:
-                    output = processSpaceGif(a[0], randid)
-        if command == "shoot":
-            args = deconstruct(userinput, ["image"])
-            if not args:
-                output = "Error"
-            else:
-                a = args[0]
-                if not a[1]:
-                    output = processShootImage(a[0], randid)
-                else:
-                    output = "Gifs not currently supported"
-        if command == "italics":
-            args = deconstruct(userinput, ["image"])
-            if not args:
-                output = "Error"
-            else:
-                a = args[0]
-                if not a[1]:
-                    output = italicizePng(a[0], randid)
-                else:
-                    output = italicizeGif(a[0], randid)
-        if command == "jpeg":
-            args = deconstruct(userinput, ["image"])
-            if not args:
-                output = "Error"
-            else:
-                a = args[0]
-                if not a[1]:
-                    output = JpegImage(a[0], randid)
-                else:
-                    output = JpegGif(a[0], randid)
-        if command == "man":
-            args = deconstruct(userinput, ["image"])
-            if not args:
-                output = "Error"
-            else:
-                a = args[0]
-                if not a[1]:
-                    output = processManImage(a[0], randid)
-                else:
-                    output = processManGif(a[0], randid)
-        if command == "jpeg2":
-            args = deconstruct(userinput, ["image", "int"])
-            if not args:
-                output = "Error"
-            else:
-                a, b = args
-                b = 20 if b > 20 else b
-                if not a[1]:
-                    output = JpegImage2(a[0], b, randid)
-                else:
-                    output = JpegGif2(a[0], b, randid)
-        if command == "jpeg3":
-            args = deconstruct(userinput, ["image", "int"])
-            if not args:
-                output = "Error"
-            else:
-                a, b = args
-                b = 20 if b > 20 else b
-                if not a[1]:
-                    output = JpegImage3(a[0], b, randid)
-                else:
-                    output = JpegGif3(a[0], b, randid)
-        if command == "weee":
-            args = deconstruct(userinput, ["image"])
-            if not args:
-                output = "Error"
-            else:
-                a = args[0]
-                if not a[1]:
-                    output = processCrazyShookImage(a[0], randid)
-                else:
-                    output = "Gifs not supported yet"
-        if command == "shake":
-            args = deconstruct(userinput, ["image"])
-            if not args:
-                output = "Error"
-            else:
-                a = args[0]
-                if not a[1]:
-                    output = processShookImage(a[0], randid)
-                else:
-                    output = "Gifs not supported yet"
-        if command == "moreshake":
-            args = deconstruct(userinput, ["image"])
-            if not args:
-                output = "Error"
-            else:
-                a = args[0]
-                if not a[1]:
-                    output = processMoreShookImage(a[0], randid)
-                else:
-                    output = "Gifs not supported yet"
-        if command == "nuke":
-            args = deconstruct(userinput, ["image"])
-            if not args:
-                output = "Error"
-            else:
-                a = args[0]
-                if not a[1]:
-                    output = processNukeImage(a[0], randid)
-                else:
-                    output = "Gifs not supported yet"
-        if command == "hold":
-            args = deconstruct(userinput, ["image"])
-            if not args:
-                output = "Error"
-            else:
-                a = args[0]
-                if not a[1]:
-                    output = processStaticImage(a[0], randid)
-                else:
-                    output = processGifImage(a[0], randid, False)
-        if command == "hold2":
-            args = deconstruct(userinput, ["image"])
-            if not args:
-                output = "Error"
-            else:
-                a = args[0]
-                if not a[1]:
-                    output = processStaticImage(a[0], randid)
-                else:
-                    output = processGifImage(a[0], randid, True)
-        if command == "overlay":
-            args = deconstruct(userinput, ["image", "string"])
-            if not args:
-                output = "Error"
-            else:
-                a, b = args
-                if not a[1]:
-                    output = notBttv(a[0], b, 0, 0, 0, 1, randid)
-                else:
-                    output = "Gifs not supported"
-        if command == "overlay2":
-            args = deconstruct(userinput, ["image", "string", "int", "int", "int", "int"])
-            if not args:
-                output = "Error"
-            else:
-                a, b, x, y, r, s = args
-                s = 0.1 if s < 0.1 else s
-                if not a[1]:
-                    output = notBttv(a[0], b, x, y, r, s, randid)
-                else:
-                    output = "Gifs not supported"
+                    output = imageFunc[command][1](*args)
     except:
         output = "Error"
+    return output
+    # client = Client(('localhost', 5000))
+    # payload = [channel_id, output]  # payload is [0] == channel id, [1] == message/filename
+    # client.send(payload)
+    # outputQueue.append([channel_id, output])  # payload is [0] == channel id, [1] == message/filename
+
+def processing(command, userinput, channel_id):
+    output = "Error"
+    output = imageProcessing(command, userinput)
     client = Client(('localhost', 5000))
     payload = [channel_id, output]  # payload is [0] == channel id, [1] == message/filename
     client.send(payload)
-    # outputQueue.append([channel_id, output])  # payload is [0] == channel id, [1] == message/filename
-
 
 if __name__ == '__main__':
     thr = threading.Thread(target=listening)
@@ -291,7 +164,7 @@ if __name__ == '__main__':
         while len(jobQueue) > 0:
             job = jobQueue.pop(0)  # job is dict channel/command/message
             print(job)
-            p = multiprocessing.Process(target=imageProcessing, args=(job["command"], job["userinput"], job["channel"]))
+            p = multiprocessing.Process(target=processing, args=(job["command"], job["userinput"], job["channel"]))
             p.start()
-            # imageProcessing(job["command"], job["userinput"], job["channel"])
+            # processing(job["command"], job["userinput"], job["channel"])
         time.sleep(0.1)

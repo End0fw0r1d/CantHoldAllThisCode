@@ -3,7 +3,8 @@ import os, glob, time, asyncio
 import math, random
 
 
-def intensifytext(inputText, intensity, red, blue, green, emojiId):
+def intensifytext(inputText, red, green, blue, intensity, emojiId):
+    print(inputText, red, green, blue, intensity, emojiId)
     myFont = ImageFont.truetype('font/whitney-semibold.otf', 30)
     marker = 0
     if inputText == "BeeMovie ":
@@ -29,7 +30,7 @@ def intensifytext(inputText, intensity, red, blue, green, emojiId):
         # print(inputText)
     canv = Image.open('canvas.png').resize((1400, 7000))
     d1 = ImageDraw.Draw(canv)
-    d1.multiline_text((0, 0), inputText, font=myFont, fill=(red, blue, green), align='center', spacing=1)
+    d1.multiline_text((0, 0), inputText, font=myFont, fill=(red, green, blue), align='center', spacing=1)
     xd, yd = d1.multiline_textsize(inputText, font=myFont, spacing=1)
     if yd > 7000:
         yd = 7000
