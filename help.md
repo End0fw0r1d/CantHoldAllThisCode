@@ -21,6 +21,7 @@ RENDERING COMMANDS:
 - **weee** [emoji] : outputs a tiled, rotating, looping image
 - **shake** [emoji] : outputs a mildly shaking image
 - **moreshake** [emoji] : outputs a moderately shaking image
+- **nuke** [emoji] : outputs an animation of the image being nuked
 - **hold** [emoji] : outputs a 'cant hold all these limes' meme, but with emoji instead of limes
 - **hold2** [emoji] : outputs as above, but gifs are given randomized frame-start offsets
 - **overlay** [emoji] [string "hazmat" "hazmatf" "mask" "maskf"] : outputs an emoji, overlayed with a bttv hazmat suit or mask, the F at the end gives a flipped version
